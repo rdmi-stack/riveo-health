@@ -169,8 +169,14 @@ export default function Navbar() {
                 <Search className="w-[18px] h-[18px]" />
               </button>
               <Link
+                href="/audit"
+                className="ml-2 px-5 py-2.5 text-sm font-semibold text-primary border-2 border-primary rounded-full hover:bg-primary/5 transition-all"
+              >
+                Free Audit
+              </Link>
+              <Link
                 href="/demo"
-                className="ml-2 px-6 py-2.5 text-sm font-semibold text-white gradient-bg rounded-full hover:opacity-90 transition-opacity shadow-lg shadow-primary/20 hover:shadow-primary/30"
+                className="px-6 py-2.5 text-sm font-semibold text-white gradient-bg rounded-full hover:opacity-90 transition-opacity shadow-lg shadow-primary/20 hover:shadow-primary/30"
               >
                 Request a Demo
               </Link>

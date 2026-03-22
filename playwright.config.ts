@@ -3,10 +3,10 @@ import { defineConfig } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests",
   fullyParallel: true,
-  retries: 0,
+  retries: 1,
   reporter: "list",
   use: {
-    baseURL: "http://localhost:3005",
+    baseURL: "http://localhost:3000",
     trace: "off",
   },
   projects: [
@@ -16,8 +16,8 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npx next dev -p 3005",
-    port: 3005,
+    command: "npm run dev",
+    port: 3000,
     reuseExistingServer: true,
   },
 });

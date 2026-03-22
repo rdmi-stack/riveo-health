@@ -454,6 +454,143 @@ No AI-native company combining **Interaction + Revenue + Financial Infrastructur
 
 ---
 
+## 8-Week Execution Playbook (Research-Backed)
+
+Based on real early-stage playbooks of Waystar, Cedar, Akasa, Collectly, Infinx, Fathom, Nym Health, Abridge + YC/a16z/General Catalyst healthcare recommendations.
+
+### Core Principle: What Actually Works vs What Founders Think Works
+
+| What founders think works | What actually works |
+|--------------------------|-------------------|
+| Build full platform, then sell | Pick ONE wedge workflow, sell that |
+| Cold email 1000 prospects | Get 3-5 design partners through relationships |
+| Launch at conferences | Embed yourself in one clinic's billing office |
+| "AI-powered RCM platform" pitch | "You lost $78K last year to denials. We fix that." |
+| Full automation from day 1 | AI + humans behind the scenes guaranteeing results |
+| Sell to hospitals first | Sell to 5-50 physician practices first |
+
+### The Wedge (Pick ONE — Do Nothing Else for 8 Weeks)
+
+| Wedge | Who did this | Why it works |
+|-------|-------------|-------------|
+| **Denial prevention & auto-resubmission** | Akasa, Waystar | Most painful, clearest dollar ROI |
+| Patient billing agent (SMS/WhatsApp) | Cedar, Collectly | Visible, easy to demo, improves collections |
+| Prior authorization automation | Infinx | Most hated workflow, 14 hrs/week wasted (AMA) |
+
+**Recommended wedge**: Denial prevention & auto-resubmission
+
+### Week 1-2: Find Design Partners
+
+A design partner = a practice that lets you sit with their billing team, use your tool for free, and give feedback. NOT a customer yet.
+
+**How successful companies found them:**
+- **Founder's network** (Abridge founder worked at UPMC → became client #1)
+- **Local geography** (Waystar sold to Louisville practices first, Waymark started with Michigan Blue Cross)
+- **LinkedIn warm intros** through mutual connections (not cold outreach)
+- **1 advisor with a rolodex** — former billing manager or RCM consultant, offer equity (Akasa hired salespeople with existing health system relationships)
+- **Direct ask**: "Can I sit with your billing team for one day? I'll buy lunch" (YC's standard advice)
+
+**Deliverables**: Wedge chosen, 10-20 warm conversations, 1-2 design partners agreed
+
+### Week 3-4: Embed in Billing Office & Build Wedge MVP
+
+**What Olive AI and Infinx did**: Literally sat in billing offices watching staff work, then built automation for exactly what they saw.
+
+**Embedding schedule:**
+- Day 1: Watch billing staff process denials. Write down every click, call, frustration. Don't pitch
+- Day 2: Map exact workflow — claim denied → read reason → call payer → fix → resubmit. Count minutes per step
+- Day 3: Identify 80/20 — which 3-5 denial reasons make up 80% of denials
+- Day 4-5: Show rough prototype, get reaction
+
+**Wedge MVP (not a platform):**
+```
+Upload denied claims (CSV or PMS connect)
+    ↓
+AI analyzes: denial reason, root cause, suggested fix
+    ↓
+Dashboard: denials by reason, priority-ranked, pre-filled corrections
+    ↓
+One-click resubmit (or staff reviews + submits)
+```
+
+**Critical — AI + humans behind the scenes**: Infinx had staff handling prior auths while their AI learned. You manually review AI outputs for first 5 clients. Promise results, not technology.
+
+**Run in shadow mode** (what Nym Health did): AI codes alongside human coders so practice compares accuracy. No risk.
+
+**Deliverables**: 2-3 days spent in billing office, wedge MVP built, shadow mode running at 1-2 design partners
+
+### Week 5-6: Free Revenue Audit & Letters of Intent
+
+**What Cedar did**: Performance-based pricing — only paid on incremental revenue collected. Zero risk to buyer.
+
+**Run the free audit** using design partner's actual data:
+- Current denial rate vs projected with Riveo
+- % of denials currently reworked vs with Riveo (95%+)
+- Days to resubmit (current vs 2 days)
+- Annual revenue impact ($78K-$200K)
+
+**Get LOIs** (YC's advice — get written commitments before product is perfect):
+> "If Riveo Health delivers denial rate reduction from X% to Y% within 30 days, [Practice Name] agrees to subscribe at $X/month on month-to-month basis."
+
+**First client pricing models (what actually worked):**
+- **Performance-based** (Cedar): 15-25% of incremental revenue recovered, zero risk to client
+- **Free 30-day pilot** (Fathom, Collectly): Free trial → $1,500-$3K/month
+- **Discounted pilot** (Akasa): 50% off for 60 days, full price after
+
+**Deliverables**: 3-5 free audits delivered, shadow mode results showing AI accuracy, 3-5 LOIs
+
+### Week 7-8: First Paying Clients & Referral Loop
+
+**Convert LOIs to paying clients** (what Collectly did — signed SMB practices in days, not months):
+- Present pilot results with their actual numbers
+- Simple contract: month-to-month, one page, no legal review needed for $2K/month SaaS
+- Onboard: import data, connect PMS, train billing manager (1 hour, not whole staff)
+- Weekly 15-min check-in with billing manager for first 60 days (Akasa did white-glove support early)
+
+**"Do things that don't scale" phase:**
+- Personally review AI outputs before they reach client
+- Manually fix AI errors
+- Call billing manager weekly
+- Track every metric obsessively
+
+**Start referral loop:**
+- Ask happy client: "Who else should be using this?" (everyone did this)
+- Post anonymized results on LinkedIn (Collectly, Cedar)
+- Billing managers all know each other — tap their network (Waystar)
+- Present at local MGMA/HFMA chapter
+
+**Deliverables**: 2-3 paying clients, $3K-$5K MRR, product iterating on real feedback, 5-10 prospect pipeline
+
+### 8-Week KPI Targets
+
+| Metric | Week 2 | Week 4 | Week 6 | Week 8 |
+|--------|:------:|:------:|:------:|:------:|
+| Design partners | 2-3 | 3-5 | 3-5 | 3-5 |
+| Billing offices visited | 1 | 2-3 | 3-5 | 5+ |
+| Free audits delivered | 0 | 1-2 | 3-5 | 5-8 |
+| LOIs / commitments | 0 | 0 | 3-5 | 5+ |
+| Paying clients | 0 | 0 | 0-1 | 2-3 |
+| MRR | $0 | $0 | $0-$1.5K | $3K-$5K |
+
+### 6 Proven Patterns (From Real Companies)
+
+1. **ONE wedge, not a platform** — Akasa: claim status only. Infinx: prior auth only. Nothing else for 8 weeks
+2. **Relationships, not cold outreach** — Cedar: Zocdoc network. Abridge: worked at UPMC. Use your personal network + 1 advisor
+3. **Sit in the billing office** — Olive: watched staff click through EHRs. 2-3 days observing changes everything
+4. **Shadow mode before live mode** — Nym: AI coded alongside humans for comparison. Let them prove ROI themselves
+5. **AI + humans behind the scenes** — Infinx: offshore staff + AI. Manually review outputs for first 5 clients
+6. **SMB first, enterprise later** — Waystar, Collectly, Fathom: small practices first. No hospitals until 20+ practice clients
+
+### Anti-Pattern: How Olive AI Went From $4B to Dead
+
+- Over-raised, over-hired (500 → 1,500 employees too fast)
+- Expanded to 10 products before nailing one
+- RPA was brittle — bots broke when EHR interfaces changed
+- Revenue concentrated in few large health systems
+- **Lesson**: Don't raise too much too early. Don't hire too fast. Don't expand before nailing one wedge
+
+---
+
 ## Website Structure (This Codebase)
 
 ### Tech: Next.js 16 + TypeScript + Tailwind CSS 4

@@ -27,6 +27,7 @@ const pages = [
   { path: "/privacy", title: "Riveo Health" },
   { path: "/terms", title: "Riveo Health" },
   { path: "/hipaa", title: "Riveo Health" },
+  { path: "/audit", title: "Riveo Health" },
 ];
 
 for (const page of pages) {
