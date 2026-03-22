@@ -1,144 +1,299 @@
 "use client";
 
-import { Star, Quote, Building2, Heart, Shield, Zap } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  AlertTriangle,
+  XCircle,
+  Clock,
+  Users,
+  X,
+  Check,
+  ArrowRight,
+  Zap,
+} from "lucide-react";
+import Link from "next/link";
 
-const stats = [
-  { value: "200+", label: "Organizations", icon: Building2 },
-  { value: "12M+", label: "Claims Processed", icon: Zap },
-  { value: "$340M+", label: "Revenue Recovered", icon: Heart },
-  { value: "99.2%", label: "Client Retention", icon: Shield },
-];
+/* ------------------------------------------------------------------ */
+/*  Data                                                               */
+/* ------------------------------------------------------------------ */
 
-const testimonials = [
+const painPoints = [
   {
-    quote:
-      "Riveo Health reduced our denial rate by 62% in the first quarter. The AI agents handle what used to take our team hours — in seconds.",
-    author: "Dr. Sarah Mitchell",
-    role: "CFO, Metro Health Systems",
-    rating: 5,
+    stat: "$125K+",
+    description: "Lost per practice annually",
+    source: "MGMA",
+    icon: AlertTriangle,
+    color: "text-amber-500",
+    bg: "bg-amber-500/10",
   },
   {
-    quote:
-      "We went from processing 500 claims a day to 2,000+ without adding headcount. The ROI was visible within the first month.",
-    author: "James Rodriguez",
-    role: "VP Revenue Cycle, Pacific Medical Group",
-    rating: 5,
+    stat: "18-25%",
+    description: "Claims denied first time",
+    source: "AMA",
+    icon: XCircle,
+    color: "text-red-500",
+    bg: "bg-red-500/10",
   },
   {
-    quote:
-      "The white-label platform let us offer AI-powered RCM to our clients overnight. It transformed our entire business model.",
-    author: "Priya Sharma",
-    role: "CEO, RevMax Solutions",
-    rating: 5,
+    stat: "52 days",
+    description: "Average days in A/R",
+    source: "HFMA",
+    icon: Clock,
+    color: "text-orange-500",
+    bg: "bg-orange-500/10",
+  },
+  {
+    stat: "30+ hrs",
+    description: "Weekly manual follow-ups",
+    source: "HBMA",
+    icon: Users,
+    color: "text-rose-500",
+    bg: "bg-rose-500/10",
   },
 ];
 
-const logos = [
-  { name: "Metro Health", color: "#4F46E5", abbr: "MH" },
-  { name: "Pacific Medical", color: "#0891B2", abbr: "PM" },
-  { name: "RevMax", color: "#7C3AED", abbr: "RX" },
-  { name: "HealthFirst", color: "#059669", abbr: "HF" },
-  { name: "MedCore", color: "#DC2626", abbr: "MC" },
-  { name: "CarePoint", color: "#D97706", abbr: "CP" },
-  { name: "VitalCare", color: "#2563EB", abbr: "VC" },
-  { name: "PrimeMed", color: "#7C3AED", abbr: "PM" },
+const comparison = [
+  {
+    feature: "Architecture",
+    legacy: "AI bolted onto 20-year-old software",
+    riveo: "AI-native from day one",
+  },
+  {
+    feature: "Implementation",
+    legacy: "3-6 month rollouts",
+    riveo: "Live in 7 days",
+  },
+  {
+    feature: "Claim Scrubbing",
+    legacy: "Manual review by staff",
+    riveo: "Automated AI validation",
+  },
+  {
+    feature: "Denials",
+    legacy: "Reactive — fix after denied",
+    riveo: "Predictive — prevent before submission",
+  },
+  {
+    feature: "Coding",
+    legacy: "Manual coders ($50K+ salary each)",
+    riveo: "AI auto-coding in < 2 seconds",
+  },
+  {
+    feature: "Data",
+    legacy: "Siloed across 10+ tools",
+    riveo: "Unified intelligence platform",
+  },
+  {
+    feature: "Pricing",
+    legacy: "Locked contracts, per-user fees",
+    riveo: "Month-to-month, usage-based",
+  },
 ];
+
+const proofs = [
+  { value: "50M+", label: "Claims trained on" },
+  { value: "40+", label: "EHR integrations" },
+  { value: "97%", label: "Coding accuracy" },
+  { value: "< 2s", label: "Per-claim analysis" },
+];
+
+/* ------------------------------------------------------------------ */
+/*  Component                                                          */
+/* ------------------------------------------------------------------ */
 
 export default function Testimonials() {
+  const [isVisible, setIsVisible] = useState(false);
+  const [hoveredRow, setHoveredRow] = useState<number | null>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section className="py-24 bg-gradient-to-b from-slate-50 to-white">
+    <section ref={sectionRef} className="py-24 bg-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-4">
-            Trusted by Leaders
+          <p className="text-sm font-semibold text-red-500 uppercase tracking-widest mb-4">
+            The Problem
           </p>
           <h2 className="text-4xl sm:text-5xl font-bold text-surface-dark tracking-tight">
-            Healthcare organizations{" "}
-            <span className="gradient-text">love Riveo Health</span>
+            Healthcare billing is{" "}
+            <span className="text-red-500">broken</span>.{" "}
+            <br className="hidden sm:block" />
+            We built the fix.
           </h2>
         </div>
 
-        {/* Stats row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
-          {stats.map((stat) => (
-            <div
-              key={stat.label}
-              className="text-center p-6 rounded-2xl bg-white border border-gray-100 hover:shadow-lg transition-shadow"
-            >
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-50 mb-4">
-                <stat.icon className="w-6 h-6 text-indigo-600" />
-              </div>
-              <p className="text-3xl sm:text-4xl font-bold text-surface-dark tracking-tight">
-                {stat.value}
-              </p>
-              <p className="text-sm text-text-muted mt-1">{stat.label}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Testimonials */}
-        <div className="grid md:grid-cols-3 gap-8 mb-20">
-          {testimonials.map((t) => (
-            <div
-              key={t.author}
-              className="bg-white rounded-2xl p-8 border border-gray-100 hover:shadow-xl transition-shadow relative"
-            >
-              <Quote className="w-10 h-10 text-primary/10 absolute top-6 right-6" />
-              <div className="flex gap-1 mb-4">
-                {Array.from({ length: t.rating }).map((_, i) => (
-                  <Star
-                    key={i}
-                    className="w-4 h-4 text-amber-400 fill-amber-400"
-                  />
-                ))}
-              </div>
-              <p className="text-text-secondary leading-relaxed mb-6">
-                &quot;{t.quote}&quot;
-              </p>
-              <div className="flex items-center gap-3 pt-6 border-t border-gray-100">
-                <div className="w-10 h-10 rounded-full gradient-bg flex items-center justify-center text-white font-bold text-sm">
-                  {t.author
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-surface-dark">
-                    {t.author}
-                  </p>
-                  <p className="text-xs text-text-muted">{t.role}</p>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Logo cloud */}
-        <div className="text-center">
-          <p className="text-sm font-semibold text-text-muted mb-2">
-            Trusted by 200+ healthcare organizations worldwide
-          </p>
-          <p className="text-xs text-text-muted/60 mb-8">
-            From community clinics to large health systems
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-6 md:gap-8">
-            {logos.map((logo) => (
-              <div
-                key={logo.name + logo.abbr}
-                className="flex items-center gap-2.5 px-5 py-3 rounded-xl bg-white border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all group"
-              >
+        {/* Pain Points — Horizontal scroll cards */}
+        <div className="relative mb-20">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {painPoints.map((point, i) => {
+              const Icon = point.icon;
+              return (
                 <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0"
-                  style={{ backgroundColor: logo.color }}
+                  key={point.stat}
+                  className={`relative p-6 rounded-2xl border border-gray-100 bg-white transition-all duration-700 hover:shadow-lg ${
+                    isVisible
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-6"
+                  }`}
+                  style={{ transitionDelay: `${i * 100}ms` }}
                 >
-                  {logo.abbr}
+                  <div
+                    className={`w-10 h-10 rounded-xl ${point.bg} flex items-center justify-center mb-4`}
+                  >
+                    <Icon className={`w-5 h-5 ${point.color}`} />
+                  </div>
+                  <p className="text-3xl font-black text-surface-dark">
+                    {point.stat}
+                  </p>
+                  <p className="text-sm text-text-secondary mt-1">
+                    {point.description}
+                  </p>
+                  <p className="text-[10px] text-text-muted mt-3 uppercase tracking-wider">
+                    Source: {point.source}
+                  </p>
                 </div>
-                <span className="text-sm font-semibold text-gray-400 group-hover:text-gray-600 transition-colors">
-                  {logo.name}
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Comparison Table — Interactive hover */}
+        <div className="mb-20">
+          <div className="text-center mb-10">
+            <h3 className="text-2xl sm:text-3xl font-bold text-surface-dark">
+              Legacy RCM vs.{" "}
+              <span className="gradient-text">Riveo Health</span>
+            </h3>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            {/* Table Header */}
+            <div className="grid grid-cols-[140px_1fr_1fr] gap-0 mb-2">
+              <div />
+              <div className="px-6 py-3 text-center">
+                <span className="text-xs font-bold text-red-400 uppercase tracking-widest">
+                  Legacy Tools
                 </span>
               </div>
-            ))}
+              <div className="px-6 py-3 text-center">
+                <span className="text-xs font-bold text-green-500 uppercase tracking-widest">
+                  Riveo Health
+                </span>
+              </div>
+            </div>
+
+            {/* Rows */}
+            <div className="space-y-2">
+              {comparison.map((row, i) => (
+                <div
+                  key={row.feature}
+                  className={`grid grid-cols-[140px_1fr_1fr] gap-0 rounded-xl overflow-hidden transition-all duration-500 cursor-default ${
+                    hoveredRow === i
+                      ? "shadow-lg scale-[1.01]"
+                      : "shadow-none scale-100"
+                  } ${
+                    isVisible
+                      ? "opacity-100 translate-x-0"
+                      : "opacity-0 translate-x-4"
+                  }`}
+                  style={{ transitionDelay: `${i * 80 + 300}ms` }}
+                  onMouseEnter={() => setHoveredRow(i)}
+                  onMouseLeave={() => setHoveredRow(null)}
+                >
+                  {/* Feature label */}
+                  <div className="px-4 py-4 bg-slate-50 flex items-center">
+                    <span className="text-xs font-bold text-text-muted uppercase tracking-wider">
+                      {row.feature}
+                    </span>
+                  </div>
+
+                  {/* Legacy */}
+                  <div
+                    className={`px-6 py-4 flex items-center gap-2 transition-colors ${
+                      hoveredRow === i ? "bg-red-50" : "bg-red-50/40"
+                    }`}
+                  >
+                    <X className="w-4 h-4 text-red-400 shrink-0" />
+                    <span className="text-sm text-red-600">{row.legacy}</span>
+                  </div>
+
+                  {/* Riveo */}
+                  <div
+                    className={`px-6 py-4 flex items-center gap-2 transition-colors ${
+                      hoveredRow === i ? "bg-green-50" : "bg-green-50/40"
+                    }`}
+                  >
+                    <Check className="w-4 h-4 text-green-500 shrink-0" />
+                    <span className="text-sm font-medium text-green-700">
+                      {row.riveo}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Technology Proof — Dark banner */}
+        <div className="bg-gradient-to-r from-slate-900 to-indigo-950 rounded-3xl p-10 md:p-14">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-10">
+            {/* Left */}
+            <div className="max-w-md">
+              <div className="flex items-center gap-2 mb-3">
+                <Zap className="w-4 h-4 text-cyan-400" />
+                <p className="text-xs font-bold text-cyan-400 uppercase tracking-widest">
+                  Technology Proof
+                </p>
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-bold text-white leading-tight mb-4">
+                Don&apos;t take our word for it.
+                <br />
+                <span className="text-cyan-300">
+                  Look at the numbers.
+                </span>
+              </h3>
+              <Link
+                href="/demo"
+                className="group inline-flex items-center gap-2 text-sm font-semibold text-white hover:gap-3 transition-all"
+              >
+                See it in action
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            {/* Right: Proof grid */}
+            <div className="grid grid-cols-2 gap-4 sm:gap-6">
+              {proofs.map((p, i) => (
+                <div
+                  key={p.label}
+                  className={`bg-white/[0.06] backdrop-blur-sm rounded-2xl px-6 py-5 border border-white/[0.06] transition-all duration-700 ${
+                    isVisible
+                      ? "opacity-100 scale-100"
+                      : "opacity-0 scale-90"
+                  }`}
+                  style={{ transitionDelay: `${i * 100 + 600}ms` }}
+                >
+                  <p className="text-3xl font-black text-white">{p.value}</p>
+                  <p className="text-xs text-slate-400 mt-1">{p.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

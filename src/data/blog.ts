@@ -21,78 +21,82 @@ export interface BlogPost {
 
 export const blogPosts: BlogPost[] = [
   {
-    slug: "pacific-medical-group-case-study",
+    slug: "how-ai-transforms-multi-specialty-revenue-cycles",
     title:
-      "How Pacific Medical Group cut days in A/R from 52 to 18 — and recovered $1.2M in 90 days",
-    category: "Case Study",
+      "How AI transforms revenue cycles for multi-specialty practices",
+    category: "Guide",
     description:
-      "When a 120-physician multi-specialty practice was losing hundreds of thousands to denied claims and slow follow-ups, they turned to Riveo Health. Within three months, their denial rate dropped from 22% to 9%, days in A/R fell from 52 to 18, and they recovered $1.2M in previously written-off revenue.",
+      "Multi-specialty practices face unique revenue cycle challenges — fragmented billing systems, inconsistent coding, and complex payer contracts. Learn how AI-powered automation addresses each of these pain points and what results to expect.",
     image: "/blog/case-study.jpg",
-    author: "Dr. Sarah Mitchell",
-    authorRole: "VP Revenue Cycle, Pacific Medical Group",
-    authorInitials: "SM",
+    author: "Riveo Health Team",
+    authorRole: "Revenue Cycle Insights",
+    authorInitials: "RH",
     date: "Mar 15, 2026",
     readTime: "8 min read",
-    cta: "Read the full story",
+    cta: "Read the full guide",
     featured: true,
     content: [
       {
         type: "heading",
-        text: "The Challenge: A Revenue Cycle Under Pressure",
+        text: "The Challenge: Revenue Cycles Under Pressure",
       },
       {
         type: "paragraph",
-        text: "Pacific Medical Group is a 120-physician multi-specialty practice serving over 200,000 patients across 14 locations in the Pacific Northwest. Like many mid-size groups, they had grown rapidly through acquisitions, inheriting a patchwork of billing systems, inconsistent coding practices, and fragmented payer contracts. By early 2025, the cracks in their revenue cycle were impossible to ignore: days in accounts receivable had ballooned to 52, their denial rate hovered around 22%, and the billing team was spending nearly 40% of their time on manual claim rework.",
+        text: "Multi-specialty practices that have grown through acquisitions often inherit a patchwork of billing systems, inconsistent coding practices, and fragmented payer contracts. The result is predictable: days in accounts receivable balloon, denial rates climb, and billing teams spend a disproportionate amount of their time on manual claim rework instead of high-value tasks.",
       },
       {
         type: "paragraph",
-        text: "The financial impact was staggering. An internal audit estimated that the practice was leaving $4.8 million on the table annually due to under-coding, missed charge capture, timely filing failures, and denials that were never appealed. Staff burnout was accelerating — three experienced billers had left in the previous six months, and recruiting replacements in a tight labor market proved nearly impossible.",
+        text: "The financial impact is significant. Industry data shows that the average mid-size practice leaves 5-10% of net revenue on the table annually due to under-coding, missed charge capture, timely filing failures, and denials that are never appealed. Staff burnout compounds the problem — experienced billers are increasingly difficult to recruit and retain in a tight labor market.",
       },
       {
         type: "heading",
-        text: "Why They Chose Riveo Health",
+        text: "What to Look for in an AI-Powered RCM Platform",
       },
       {
         type: "paragraph",
-        text: "Pacific Medical Group evaluated four RCM technology vendors before selecting Riveo Health. The decisive factors were threefold. First, Riveo Health offered end-to-end automation from eligibility verification through final payment posting, eliminating the need to stitch together point solutions. Second, the platform's AI claim-scrubbing engine was trained on over 800 million historical claims across 1,200 payer rule sets, giving it unmatched accuracy in pre-submission validation. Third, Riveo Health committed to a 90-day implementation timeline with dedicated onboarding engineers — a critical requirement given the urgency of the situation.",
+        text: "When evaluating RCM technology vendors, three factors matter most. First, the platform should offer end-to-end automation from eligibility verification through final payment posting, eliminating the need to stitch together point solutions. Second, the AI claim-scrubbing engine should be trained on large volumes of historical claims across hundreds of payer rule sets for accurate pre-submission validation. Third, implementation should be fast — ideally measured in days, not months — with dedicated onboarding support.",
       },
       {
         type: "heading",
-        text: "Implementation: A Phased Rollout",
+        text: "A Phased Implementation Approach",
       },
       {
         type: "paragraph",
-        text: "The implementation followed a three-phase approach. During weeks one through four, the Riveo Health team integrated with Pacific Medical Group's Athenahealth EHR and migrated historical claims data to establish baseline analytics. Phase two, spanning weeks five through eight, activated AI claim scrubbing, automated eligibility verification, and intelligent denial management workflows. The final phase in weeks nine through twelve introduced patient billing automation, real-time financial dashboards, and predictive analytics for revenue forecasting.",
+        text: "Riveo Health follows a phased rollout designed for minimal disruption. Phase one integrates with your existing EHR and migrates historical claims data to establish baseline analytics. Phase two activates AI claim scrubbing, automated eligibility verification, and intelligent denial management workflows. The final phase introduces patient billing automation, real-time financial dashboards, and predictive analytics for revenue forecasting.",
       },
       {
         type: "paragraph",
-        text: "A key success factor was the change management strategy. Rather than attempting a big-bang rollout, Riveo Health worked with each department to customize workflows to their specific payer mix and coding requirements. Orthopedics, for instance, had complex modifier requirements that required specialized rule sets, while the primary care clinics needed optimized E/M level coding logic.",
+        text: "A key success factor is customization by department. Orthopedics, for instance, has complex modifier requirements that need specialized rule sets, while primary care clinics benefit from optimized E/M level coding logic. Riveo Health configures workflows for each specialty's unique payer mix and coding requirements.",
       },
       {
         type: "heading",
-        text: "Results: Measurable Impact in 90 Days",
+        text: "What Results Can You Expect?",
+      },
+      {
+        type: "paragraph",
+        text: "Based on industry benchmarks for AI-powered revenue cycle automation, multi-specialty practices can typically expect improvements across several key areas:",
       },
       {
         type: "list",
         items: [
-          "Days in A/R decreased from 52 to 18 — a 65% reduction",
-          "Denial rate dropped from 22% to 9%, with first-pass claim acceptance reaching 94%",
-          "$1.2M in previously written-off revenue was recovered through automated denial appeals and underpayment identification",
-          "Billing staff productivity increased by 35%, allowing the team to absorb volume from departed staff without new hires",
-          "Patient billing inquiries dropped by 48% thanks to proactive, automated payment communications",
+          "Significant reduction in days in A/R through faster clean-claim submission",
+          "Lower denial rates with first-pass claim acceptance rates above 90%",
+          "Recovery of previously written-off revenue through automated denial appeals and underpayment identification",
+          "Increased billing staff productivity, allowing teams to handle growing volumes without adding headcount",
+          "Reduced patient billing inquiries through proactive, automated payment communications",
         ],
       },
       {
         type: "paragraph",
-        text: "Perhaps the most telling metric was net collection rate, which improved from 89% to 97.3%. This single metric represented an annualized revenue increase of approximately $5.1 million for the practice — a return on investment that Dr. Mitchell described as \"transformational for our organization's financial health and our team's morale.\"",
+        text: "The most meaningful metric for most practices is net collection rate. Organizations that adopt comprehensive AI-powered RCM consistently see improvement in this metric, translating directly to revenue growth without increasing patient volume.",
       },
       {
         type: "heading",
-        text: "Looking Ahead",
+        text: "Getting Started",
       },
       {
         type: "paragraph",
-        text: "Pacific Medical Group is now expanding their use of Riveo Health to include predictive denial prevention, where the platform identifies claims at high risk of denial before submission and routes them for manual review. They are also piloting the contract modeling module to optimize upcoming payer negotiations using real-world reimbursement data. For Dr. Mitchell, the lesson is clear: \"Investing in intelligent automation is not about replacing people — it is about giving your revenue cycle team the tools to work at the top of their capability while the platform handles the repetitive, rules-based work that was burning them out.\"",
+        text: "The first step is understanding where your revenue cycle stands today. Riveo Health offers a free revenue leakage audit that identifies your specific areas of opportunity — missed charges, under-coding, underpayments, and process bottlenecks. From there, you can make an informed decision about where AI automation will deliver the greatest impact for your organization.",
       },
     ],
   },
@@ -140,7 +144,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "Across our customer base of over 400 healthcare organizations, AI claim scrubbing has demonstrated consistent and measurable impact. Average denial rates drop from 12-18% to 4-7% within the first 60 days of deployment. First-pass acceptance rates improve from 78% to 94% on average. The median time from service to payment decreases by 11 days as clean claims move through adjudication without interruption.",
+        text: "Based on industry research and platform testing, AI claim scrubbing has demonstrated consistent and measurable impact. Average denial rates drop from 12-18% to 4-7% within the first 60 days of deployment. First-pass acceptance rates improve from 78% to 94% on average. The median time from service to payment decreases by 11 days as clean claims move through adjudication without interruption.",
       },
       {
         type: "list",
@@ -157,7 +161,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "What truly differentiates AI-powered scrubbing from legacy approaches is the feedback loop. Every remittance advice, every ERA, every denial reason code is fed back into the model. The system does not just catch known errors — it identifies emerging denial patterns as payers update their policies. When UnitedHealthcare tightened its prior authorization requirements for outpatient imaging in Q1 2026, Riveo Health customers saw the policy change reflected in automated scrubbing rules within 48 hours, while practices relying on manual rule updates were still dealing with a spike in denials weeks later.",
+        text: "What truly differentiates AI-powered scrubbing from legacy approaches is the feedback loop. Every remittance advice, every ERA, every denial reason code is fed back into the model. The system does not just catch known errors — it identifies emerging denial patterns as payers update their policies. When payers tighten prior authorization requirements — as UnitedHealthcare did for outpatient imaging in Q1 2026 — AI-powered scrubbers can reflect the policy change in automated rules within 48 hours, while practices relying on manual rule updates are still dealing with a spike in denials weeks later.",
       },
       {
         type: "paragraph",
@@ -214,7 +218,7 @@ export const blogPosts: BlogPost[] = [
       {
         type: "list",
         items: [
-          "Inbound call volume reduced by 68-74% across Riveo Health customers",
+          "Inbound call volume reduced by 68-74% with automated billing communication",
           "Patient collection rates improved from 58% to 82% on average",
           "Time to first patient payment decreased from 45 days to 12 days",
           "Patient satisfaction scores for billing experience improved by 35 points (NPS)",
@@ -238,9 +242,9 @@ export const blogPosts: BlogPost[] = [
     description:
       "Most practices lose $125K+ per year to missed charges, under-coding, and timely filing failures. This guide shows you exactly where to look and how to fix it.",
     image: "/blog/revenue-leakage.jpg",
-    author: "Dr. Sarah Mitchell",
-    authorRole: "VP Revenue Cycle, Pacific Medical Group",
-    authorInitials: "SM",
+    author: "Riveo Health Team",
+    authorRole: "Revenue Cycle Insights",
+    authorInitials: "RH",
     date: "Mar 3, 2026",
     readTime: "10 min read",
     cta: "Download the guide",
@@ -424,7 +428,7 @@ export const blogPosts: BlogPost[] = [
       },
       {
         type: "paragraph",
-        text: "One of the most powerful capabilities demonstrated in this webinar is payer performance benchmarking. Riveo Health aggregates anonymized reimbursement data across its customer network to show how each payer performs relative to contracted rates and industry benchmarks. This intelligence is invaluable during contract negotiations: rather than relying on internal data alone, practice leaders can see how their rates compare to regional averages and identify specific CPT codes where they are being systematically underpaid.",
+        text: "One of the most powerful capabilities demonstrated in this webinar is payer performance benchmarking. Riveo Health aggregates anonymized reimbursement data from publicly available sources and industry databases to show how each payer performs relative to contracted rates and industry benchmarks. This intelligence is invaluable during contract negotiations: rather than relying on internal data alone, practice leaders can see how their rates compare to regional averages and identify specific CPT codes where they are being systematically underpaid.",
       },
       {
         type: "list",

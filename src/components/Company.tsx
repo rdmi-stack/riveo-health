@@ -1,179 +1,300 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import {
-  Shield,
-  Rocket,
-  Users,
-  Clock,
+  ArrowRight,
   Upload,
   Settings,
   TrendingUp,
+  Shield,
+  Clock,
+  Zap,
+  CheckCircle,
+  XCircle,
 } from "lucide-react";
 
-const values = [
-  {
-    icon: Shield,
-    title: "Security You Can Trust",
-    description:
-      "HIPAA, GDPR, SOC 2 Type II certified. Your patient data is protected with enterprise-grade encryption and access controls.",
-  },
-  {
-    icon: Rocket,
-    title: "AI That Actually Works",
-    description:
-      "Not a chatbot bolted onto legacy software. Riveo Health is built from scratch with AI at the core to solve real billing problems.",
-  },
-  {
-    icon: Users,
-    title: "Built Around Your Workflow",
-    description:
-      "Every feature exists because a billing manager, CFO, or coder asked for it. We build what you need, not what looks good in a demo.",
-  },
-  {
-    icon: Clock,
-    title: "ROI in 30 Days",
-    description:
-      "Most clients recover more revenue in the first month than they spend all year. We measure our success by your recovered dollars.",
-  },
-];
+/* ------------------------------------------------------------------ */
+/*  3-Step Process                                                     */
+/* ------------------------------------------------------------------ */
 
 const steps = [
   {
-    step: "01",
+    number: "01",
     icon: Upload,
-    title: "Connect Your Systems",
+    title: "Connect",
+    subtitle: "Your systems, our AI",
     description:
-      "We integrate with your existing EHR, practice management, and clearinghouse in under a week. No rip-and-replace. No disruption to your team.",
+      "We plug into your existing EHR, PM system, and clearinghouse. No rip-and-replace. No disruption. Your team keeps working while we set up.",
+    detail: "Under 7 days to go live",
+    image: "/steps/connect.jpg",
+    color: "#6366F1",
   },
   {
-    step: "02",
+    number: "02",
     icon: Settings,
-    title: "AI Learns Your Patterns",
+    title: "Learn",
+    subtitle: "AI adapts to you",
     description:
-      "Riveo Health analyzes your claims history, denial patterns, and payer rules to build a custom model tuned to your organization's revenue cycle.",
+      "Riveo Health analyzes your claims history, denial patterns, and payer rules. It builds a custom AI model tuned to your specific revenue cycle.",
+    detail: "Gets smarter with every claim",
+    image: "/steps/ai-learns.jpg",
+    color: "#06B6D4",
   },
   {
-    step: "03",
+    number: "03",
     icon: TrendingUp,
-    title: "Watch Revenue Recover",
+    title: "Recover",
+    subtitle: "Revenue flows back",
     description:
-      "Claims go out cleaner, denials drop, follow-ups happen automatically, and your team focuses on exceptions — not routine work.",
+      "Claims go out cleaner. Denials drop. Follow-ups happen automatically. Your team focuses on exceptions — not routine work.",
+    detail: "ROI visible within 30 days",
+    image: "/steps/revenue.jpg",
+    color: "#10B981",
   },
 ];
 
+/* ------------------------------------------------------------------ */
+/*  Promise Items                                                      */
+/* ------------------------------------------------------------------ */
+
+const promises = [
+  { text: "No long-term contracts", included: true },
+  { text: "Month-to-month flexibility", included: true },
+  { text: "Free revenue leakage audit", included: true },
+  { text: "7-day implementation", included: true },
+  { text: "Dedicated account manager", included: true },
+  { text: "ROI guarantee in 30 days", included: true },
+  { text: "Hidden fees", included: false },
+  { text: "Setup charges", included: false },
+  { text: "Long sales cycles", included: false },
+  { text: "Data lock-in", included: false },
+];
+
+/* ------------------------------------------------------------------ */
+/*  Component                                                          */
+/* ------------------------------------------------------------------ */
+
 export default function Company() {
+  const [visibleStep, setVisibleStep] = useState(-1);
+  const stepsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = stepsRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          let i = 0;
+          const interval = setInterval(() => {
+            setVisibleStep(i);
+            i++;
+            if (i >= steps.length) clearInterval(interval);
+          }, 400);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section id="company" className="py-24 bg-white">
+    <section id="company" className="py-24 bg-slate-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-20">
           <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-4">
-            Why Riveo Health
+            How It Works
           </p>
           <h2 className="text-4xl sm:text-5xl font-bold text-surface-dark tracking-tight">
-            Stop losing revenue to{" "}
-            <span className="gradient-text">
-              broken billing workflows.
-            </span>
+            Go live in days.{" "}
+            <span className="gradient-text">See ROI in weeks.</span>
           </h2>
-          <p className="mt-6 text-lg text-text-secondary leading-relaxed">
-            Healthcare teams spend too many hours chasing claims, fixing
-            denials, and reconciling payments. Riveo Health handles the heavy
-            lifting so your team can focus on what matters.
+          <p className="mt-4 text-lg text-text-secondary">
+            Three steps. Seven days. No disruption to your team.
           </p>
         </div>
 
-        {/* Values */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
-          {values.map((v) => {
-            const Icon = v.icon;
+        {/* 3-Step Visual Process */}
+        <div ref={stepsRef} className="space-y-6 max-w-5xl mx-auto mb-24">
+          {steps.map((step, i) => {
+            const Icon = step.icon;
+            const isVisible = i <= visibleStep;
             return (
               <div
-                key={v.title}
-                className="text-center p-8 rounded-2xl border border-gray-100 hover:shadow-lg hover:border-primary/20 transition-all"
+                key={step.number}
+                className={`transition-all duration-700 ${
+                  isVisible
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-8"
+                }`}
+                style={{ transitionDelay: `${i * 150}ms` }}
               >
-                <div className="w-14 h-14 rounded-xl gradient-bg flex items-center justify-center mx-auto mb-5">
-                  <Icon className="w-7 h-7 text-white" />
+                <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-shadow">
+                  <div className="grid md:grid-cols-[280px_1fr] min-h-[200px]">
+                    {/* Image */}
+                    <div className="relative hidden md:block">
+                      <Image
+                        src={step.image}
+                        alt={step.title}
+                        fill
+                        className="object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/10" />
+                      {/* Step number overlay */}
+                      <div className="absolute top-4 left-4">
+                        <div
+                          className="w-12 h-12 rounded-xl flex items-center justify-center text-white font-black text-lg shadow-lg"
+                          style={{ backgroundColor: step.color }}
+                        >
+                          {step.number}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="p-8 flex flex-col justify-center">
+                      <div className="flex items-center gap-3 mb-1 md:hidden">
+                        <div
+                          className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+                          style={{ backgroundColor: step.color }}
+                        >
+                          {step.number}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 mb-2">
+                        <Icon className="w-5 h-5 text-primary" />
+                        <h3 className="text-2xl font-bold text-surface-dark">
+                          {step.title}
+                        </h3>
+                        <span className="text-sm text-text-muted">
+                          — {step.subtitle}
+                        </span>
+                      </div>
+                      <p className="text-text-secondary leading-relaxed mb-4 max-w-lg">
+                        {step.description}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-primary" />
+                        <span className="text-sm font-semibold text-primary">
+                          {step.detail}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-lg font-bold text-surface-dark mb-2">
-                  {v.title}
-                </h3>
-                <p className="text-sm text-text-secondary leading-relaxed">
-                  {v.description}
-                </p>
+
+                {/* Connector */}
+                {i < steps.length - 1 && (
+                  <div className="flex justify-center py-2">
+                    <div
+                      className={`w-px h-8 transition-all duration-500 ${
+                        isVisible ? "bg-primary/30" : "bg-transparent"
+                      }`}
+                    />
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
 
-        {/* How It Works */}
-        <div className="max-w-4xl mx-auto">
-          <h3 className="text-2xl font-bold text-surface-dark text-center mb-4">
-            How It Works
-          </h3>
-          <p className="text-center text-text-secondary mb-12 max-w-2xl mx-auto">
-            Go live in days, not months. Three simple steps to transform your
-            revenue cycle.
-          </p>
-          <div className="grid md:grid-cols-3 gap-8">
-            {steps.map((s) => {
-              const Icon = s.icon;
-              return (
-                <div
-                  key={s.step}
-                  className="relative bg-white rounded-2xl border border-gray-100 p-8 hover:shadow-lg transition-shadow text-center"
-                >
-                  <div className="text-5xl font-black text-primary/10 mb-4">
-                    {s.step}
-                  </div>
-                  <div className="w-14 h-14 rounded-xl gradient-bg flex items-center justify-center mx-auto mb-5">
-                    <Icon className="w-7 h-7 text-white" />
-                  </div>
-                  <h4 className="text-lg font-bold text-surface-dark mb-3">
-                    {s.title}
-                  </h4>
-                  <p className="text-sm text-text-secondary leading-relaxed">
-                    {s.description}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Customer Promise Banner */}
-        <div className="mt-20 bg-gradient-to-r from-slate-900 to-indigo-900 rounded-3xl p-10 md:p-14 text-white text-center">
-          <h3 className="text-2xl font-bold mb-4">
-            Our Promise to You
-          </h3>
-          <p className="text-slate-300 max-w-2xl mx-auto mb-8 leading-relaxed">
-            If you don&apos;t see measurable improvement in your denial rate and
-            collection speed within 30 days, we&apos;ll work with you at no
-            additional cost until you do.
-          </p>
-          <div className="grid sm:grid-cols-3 gap-6 max-w-3xl mx-auto">
-            {[
-              {
-                title: "No Long Contracts",
-                desc: "Month-to-month available. Stay because it works, not because you're locked in.",
-              },
-              {
-                title: "Dedicated Support",
-                desc: "A named account manager who knows your organization and your payers.",
-              },
-              {
-                title: "Transparent Pricing",
-                desc: "No hidden fees. You see exactly what you pay for and the ROI you're getting.",
-              },
-            ].map((m) => (
-              <div
-                key={m.title}
-                className="p-6 bg-white/5 rounded-xl border border-white/10"
+        {/* Promise Section — Unique two-column YES/NO layout */}
+        <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 rounded-3xl overflow-hidden">
+          <div className="grid lg:grid-cols-2">
+            {/* Left: The Promise */}
+            <div className="p-10 lg:p-14 flex flex-col justify-center">
+              <p className="text-xs font-bold text-cyan-400 uppercase tracking-widest mb-4">
+                Our Promise
+              </p>
+              <h3 className="text-3xl sm:text-4xl font-bold text-white leading-tight mb-4">
+                We bet on your success.
+                <br />
+                <span className="text-cyan-300">Not your contract.</span>
+              </h3>
+              <p className="text-slate-300 leading-relaxed mb-8 max-w-md">
+                If you don&apos;t see measurable improvement in your denial rate
+                and collection speed within 30 days, we work with you at no
+                additional cost until you do.
+              </p>
+              <Link
+                href="/demo"
+                className="group inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-slate-900 bg-white rounded-full hover:bg-slate-100 transition-colors shadow-lg w-fit"
               >
-                <h4 className="text-base font-bold mb-2">{m.title}</h4>
-                <p className="text-sm text-slate-400">{m.desc}</p>
+                Start risk-free
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+
+            {/* Right: Yes/No Grid */}
+            <div className="p-10 lg:p-14 bg-white/[0.03]">
+              <div className="grid grid-cols-2 gap-x-8 gap-y-0">
+                {/* Yes column */}
+                <div>
+                  <p className="text-xs font-bold text-green-400 uppercase tracking-widest mb-4 flex items-center gap-1.5">
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    What you get
+                  </p>
+                  <ul className="space-y-3.5">
+                    {promises
+                      .filter((p) => p.included)
+                      .map((p) => (
+                        <li
+                          key={p.text}
+                          className="flex items-center gap-2.5 text-sm text-slate-200"
+                        >
+                          <CheckCircle className="w-4 h-4 text-green-400 shrink-0" />
+                          {p.text}
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+
+                {/* No column */}
+                <div>
+                  <p className="text-xs font-bold text-red-400 uppercase tracking-widest mb-4 flex items-center gap-1.5">
+                    <XCircle className="w-3.5 h-3.5" />
+                    What we don&apos;t do
+                  </p>
+                  <ul className="space-y-3.5">
+                    {promises
+                      .filter((p) => !p.included)
+                      .map((p) => (
+                        <li
+                          key={p.text}
+                          className="flex items-center gap-2.5 text-sm text-slate-400 line-through decoration-slate-600"
+                        >
+                          <XCircle className="w-4 h-4 text-red-400/60 shrink-0" />
+                          {p.text}
+                        </li>
+                      ))}
+                  </ul>
+                </div>
               </div>
-            ))}
+
+              {/* Trust badges */}
+              <div className="flex items-center gap-6 mt-10 pt-8 border-t border-white/[0.06]">
+                {[
+                  { icon: Shield, text: "HIPAA Compliant" },
+                  { icon: Shield, text: "SOC 2 Type II" },
+                  { icon: Clock, text: "99.9% Uptime" },
+                ].map((badge) => {
+                  const BadgeIcon = badge.icon;
+                  return (
+                    <div
+                      key={badge.text}
+                      className="flex items-center gap-1.5 text-xs text-slate-500"
+                    >
+                      <BadgeIcon className="w-3.5 h-3.5 text-cyan-500" />
+                      {badge.text}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </div>

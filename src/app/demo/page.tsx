@@ -9,17 +9,12 @@ import {
   CheckCircle,
   Shield,
   Clock,
-  Users,
   TrendingUp,
-  Star,
   Phone,
-  Mail,
-  Building2,
   Zap,
   Play,
   Calendar,
   ChevronDown,
-  Quote,
 } from "lucide-react";
 
 const benefits = [
@@ -63,15 +58,6 @@ const processSteps = [
   },
 ];
 
-const trustedLogos = [
-  { name: "Metro Health", abbr: "MH", color: "#4F46E5" },
-  { name: "Pacific Medical", abbr: "PM", color: "#0891B2" },
-  { name: "RevMax", abbr: "RX", color: "#7C3AED" },
-  { name: "HealthFirst", abbr: "HF", color: "#059669" },
-  { name: "CarePoint", abbr: "CP", color: "#D97706" },
-  { name: "VitalCare", abbr: "VC", color: "#2563EB" },
-];
-
 const faqs = [
   {
     q: "How long does the demo take?",
@@ -87,7 +73,7 @@ const faqs = [
   },
   {
     q: "Is there a contract or commitment?",
-    a: "No. We offer month-to-month plans. You stay because Riveo Health works, not because you're locked in. Most clients see ROI within the first 30 days.",
+    a: "No. We offer month-to-month plans with no long-term contracts. You stay because Riveo Health works, not because you're locked in.",
   },
   {
     q: "What about HIPAA compliance?",
@@ -132,7 +118,7 @@ export default function DemoPage() {
           <div className="absolute bottom-0 left-20 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl" />
 
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
-            <div className="grid lg:grid-cols-2 gap-16 items-start">
+            <div className="grid lg:grid-cols-2 gap-12 xl:gap-16 items-start">
               {/* Left: headline + trust */}
               <div className="pt-4">
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 border border-white/20 rounded-full text-sm font-medium text-cyan-300 mb-8 backdrop-blur-sm">
@@ -147,24 +133,24 @@ export default function DemoPage() {
 
                 <p className="mt-6 text-lg text-slate-300 leading-relaxed max-w-xl">
                   Get a free revenue leakage audit and a live demo of Riveo
-                  Health tailored to your organization. Most clients recover
-                  more in month one than they spend all year.
+                  Health tailored to your organization. Discover how much
+                  revenue you could recover with AI-powered automation.
                 </p>
 
                 {/* What you'll get */}
-                <div className="mt-10 space-y-5">
+                <div className="mt-10 space-y-6">
                   {benefits.map((b) => {
                     const Icon = b.icon;
                     return (
                       <div key={b.title} className="flex items-start gap-4">
-                        <div className="w-11 h-11 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center shrink-0">
+                        <div className="w-11 h-11 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center shrink-0 backdrop-blur-sm">
                           <Icon className="w-5 h-5 text-cyan-400" />
                         </div>
                         <div>
-                          <p className="text-white font-semibold text-sm">
+                          <p className="text-white font-semibold text-[15px]">
                             {b.title}
                           </p>
-                          <p className="text-slate-400 text-sm mt-0.5">
+                          <p className="text-slate-400 text-sm mt-1 leading-relaxed">
                             {b.desc}
                           </p>
                         </div>
@@ -174,7 +160,7 @@ export default function DemoPage() {
                 </div>
 
                 {/* Trust row */}
-                <div className="mt-10 flex items-center gap-6 text-sm text-slate-400">
+                <div className="mt-12 pt-8 border-t border-white/10 flex flex-wrap items-center gap-6 text-sm text-slate-400">
                   <div className="flex items-center gap-2">
                     <Shield className="w-4 h-4 text-cyan-400" />
                     HIPAA Compliant
@@ -184,20 +170,21 @@ export default function DemoPage() {
                     Response in 24h
                   </div>
                   <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-cyan-400" />
-                    200+ Orgs Trust Us
+                    <Zap className="w-4 h-4 text-cyan-400" />
+                    7-Day Go-Live
                   </div>
                 </div>
               </div>
 
               {/* Right: Form */}
               <div className="relative">
-                <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-10">
+                <div className="absolute -inset-1 bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 rounded-[28px] blur-xl" />
+                <div className="relative bg-white rounded-3xl shadow-2xl p-8 md:p-10">
                   <div className="mb-8">
                     <h2 className="text-2xl font-bold text-surface-dark">
                       Request your demo
                     </h2>
-                    <p className="text-sm text-text-secondary mt-1">
+                    <p className="text-sm text-text-secondary mt-1.5">
                       Fill out the form and our team will be in touch within 24
                       hours.
                     </p>
@@ -221,7 +208,7 @@ export default function DemoPage() {
                               firstName: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-surface-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm text-surface-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary focus:bg-white transition-all"
                         />
                       </div>
                       <div>
@@ -239,7 +226,7 @@ export default function DemoPage() {
                               lastName: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-surface-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm text-surface-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary focus:bg-white transition-all"
                         />
                       </div>
                     </div>
@@ -257,7 +244,7 @@ export default function DemoPage() {
                         onChange={(e) =>
                           setFormData({ ...formData, email: e.target.value })
                         }
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-surface-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm text-surface-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary focus:bg-white transition-all"
                       />
                     </div>
 
@@ -273,7 +260,7 @@ export default function DemoPage() {
                         onChange={(e) =>
                           setFormData({ ...formData, phone: e.target.value })
                         }
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-surface-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm text-surface-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary focus:bg-white transition-all"
                       />
                     </div>
 
@@ -285,7 +272,7 @@ export default function DemoPage() {
                       <input
                         type="text"
                         required
-                        placeholder="Metro Health Systems"
+                        placeholder="Your Organization"
                         value={formData.organization}
                         onChange={(e) =>
                           setFormData({
@@ -293,7 +280,7 @@ export default function DemoPage() {
                             organization: e.target.value,
                           })
                         }
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-surface-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm text-surface-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary focus:bg-white transition-all"
                       />
                     </div>
 
@@ -312,7 +299,7 @@ export default function DemoPage() {
                               orgType: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-surface-dark focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all appearance-none bg-white"
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm text-surface-dark focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary focus:bg-white transition-all appearance-none"
                         >
                           <option value="">Select...</option>
                           <option>Hospital / Health System</option>
@@ -334,7 +321,7 @@ export default function DemoPage() {
                               claimVolume: e.target.value,
                             })
                           }
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-surface-dark focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all appearance-none bg-white"
+                          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm text-surface-dark focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary focus:bg-white transition-all appearance-none"
                         >
                           <option value="">Select...</option>
                           <option>Under 1,000</option>
@@ -358,7 +345,7 @@ export default function DemoPage() {
                         onChange={(e) =>
                           setFormData({ ...formData, message: e.target.value })
                         }
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-surface-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 text-sm text-surface-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary focus:bg-white transition-all resize-none"
                       />
                     </div>
 
@@ -388,33 +375,6 @@ export default function DemoPage() {
           </div>
         </section>
 
-        {/* ===== SOCIAL PROOF BAR ===== */}
-        <section className="py-12 bg-white border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <p className="text-center text-sm text-text-muted mb-8">
-              Trusted by 200+ healthcare organizations
-            </p>
-            <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10">
-              {trustedLogos.map((logo) => (
-                <div
-                  key={logo.name}
-                  className="flex items-center gap-2.5 px-4 py-2 rounded-lg"
-                >
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold"
-                    style={{ backgroundColor: logo.color }}
-                  >
-                    {logo.abbr}
-                  </div>
-                  <span className="text-sm font-semibold text-gray-400">
-                    {logo.name}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* ===== HOW IT WORKS ===== */}
         <section className="py-24 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -432,19 +392,16 @@ export default function DemoPage() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
                 </div>
                 {/* Floating card */}
-                <div className="absolute -bottom-6 -right-6 bg-white rounded-xl shadow-xl border border-gray-100 p-5 max-w-[240px]">
+                <div className="absolute -bottom-6 -right-6 bg-white rounded-2xl shadow-xl border border-gray-100 p-5 max-w-[240px]">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
                     <span className="text-xs font-semibold text-green-600">
                       Live Demo Session
                     </span>
                   </div>
-                  <p className="text-sm text-text-secondary">
-                    &quot;We found $340K in revenue leakage in the first
-                    audit.&quot;
-                  </p>
-                  <p className="text-xs text-text-muted mt-2">
-                    — CFO, Metro Health
+                  <p className="text-sm text-text-secondary leading-relaxed">
+                    Revenue leakage detection finds an average of $78K+ in
+                    missed charges per audit.
                   </p>
                 </div>
               </div>
@@ -464,16 +421,21 @@ export default function DemoPage() {
                 </p>
 
                 <div className="space-y-8">
-                  {processSteps.map((s) => (
-                    <div key={s.step} className="flex items-start gap-5">
-                      <div className="w-12 h-12 rounded-2xl gradient-bg flex items-center justify-center shrink-0 text-white font-bold text-lg shadow-lg shadow-primary/20">
-                        {s.step}
+                  {processSteps.map((s, i) => (
+                    <div key={s.step} className="flex items-start gap-5 group">
+                      <div className="relative">
+                        <div className="w-12 h-12 rounded-2xl gradient-bg flex items-center justify-center shrink-0 text-white font-bold text-lg shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
+                          {s.step}
+                        </div>
+                        {i < processSteps.length - 1 && (
+                          <div className="absolute top-14 left-1/2 -translate-x-1/2 w-px h-8 bg-gradient-to-b from-primary/30 to-transparent" />
+                        )}
                       </div>
                       <div>
                         <h3 className="text-lg font-bold text-surface-dark">
                           {s.title}
                         </h3>
-                        <p className="text-sm text-text-secondary mt-1">
+                        <p className="text-sm text-text-secondary mt-1 leading-relaxed">
                           {s.desc}
                         </p>
                       </div>
@@ -520,7 +482,7 @@ export default function DemoPage() {
               ].map((item) => (
                 <div
                   key={item.title}
-                  className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300"
+                  className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-xl hover:border-gray-200 transition-all duration-300"
                 >
                   <div className="relative h-52 overflow-hidden">
                     <Image
@@ -555,90 +517,72 @@ export default function DemoPage() {
           </div>
         </section>
 
-        {/* ===== TESTIMONIAL HIGHLIGHT ===== */}
+        {/* ===== WHY HEALTHCARE LEADERS CHOOSE RIVEO HEALTH ===== */}
         <section className="py-24 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
-              {/* Quote */}
-              <div>
-                <Quote className="w-14 h-14 text-primary/10 mb-6" />
-                <blockquote className="text-2xl sm:text-3xl font-bold text-surface-dark leading-snug mb-8">
-                  &quot;We went from processing 500 claims a day to 2,000+
-                  without adding headcount. The ROI was visible within the
-                  first month.&quot;
-                </blockquote>
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-full gradient-bg flex items-center justify-center text-white font-bold text-lg">
-                    JR
-                  </div>
-                  <div>
-                    <p className="font-bold text-surface-dark">
-                      James Rodriguez
-                    </p>
-                    <p className="text-sm text-text-muted">
-                      VP Revenue Cycle, Pacific Medical Group
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-1 mt-4">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      className="w-5 h-5 text-amber-400 fill-amber-400"
-                    />
-                  ))}
-                </div>
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <p className="text-sm font-semibold text-primary uppercase tracking-widest mb-4">
+                Why Riveo Health
+              </p>
+              <h2 className="text-3xl sm:text-4xl font-bold text-surface-dark tracking-tight">
+                Why Healthcare Leaders Choose Riveo Health
+              </h2>
+            </div>
 
-                {/* Stats */}
-                <div className="grid grid-cols-3 gap-6 mt-10 pt-10 border-t border-gray-100">
-                  {[
-                    { value: "60%", label: "Fewer denials" },
-                    { value: "18 days", label: "Avg. days in A/R" },
-                    { value: "$1.2M", label: "Revenue recovered" },
-                  ].map((s) => (
-                    <div key={s.label}>
-                      <p className="text-2xl font-bold gradient-text">
-                        {s.value}
-                      </p>
-                      <p className="text-xs text-text-muted mt-1">
-                        {s.label}
-                      </p>
+            <div className="grid md:grid-cols-3 gap-8 mb-16">
+              {[
+                {
+                  title: "AI-Native Architecture",
+                  desc: "Built from scratch with AI at the core, not bolted onto legacy software.",
+                  icon: Zap,
+                },
+                {
+                  title: "7-Day Go-Live",
+                  desc: "Integrate with your existing EHR and go live in days, not months.",
+                  icon: Clock,
+                },
+                {
+                  title: "Risk-Free Start",
+                  desc: "Free revenue audit, month-to-month plans, and ROI guaranteed in 30 days.",
+                  icon: Shield,
+                },
+              ].map((card) => {
+                const CardIcon = card.icon;
+                return (
+                  <div
+                    key={card.title}
+                    className="group bg-slate-50 rounded-2xl p-8 border border-gray-100 hover:shadow-lg hover:border-gray-200 transition-all duration-300"
+                  >
+                    <div className="w-12 h-12 rounded-xl gradient-bg flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                      <CardIcon className="w-6 h-6 text-white" />
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Image */}
-              <div className="relative">
-                <div className="rounded-2xl overflow-hidden shadow-2xl">
-                  <Image
-                    src="/demo/team-collab.jpg"
-                    alt="Team using Riveo Health"
-                    width={800}
-                    height={500}
-                    className="w-full h-auto object-cover"
-                  />
-                </div>
-                {/* Floating results card */}
-                <div className="absolute -top-6 -left-6 bg-white rounded-xl shadow-xl border border-gray-100 p-5">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-lg gradient-bg flex items-center justify-center">
-                      <TrendingUp className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-text-muted">
-                        Revenue Recovered
-                      </p>
-                      <p className="text-xl font-bold text-surface-dark">
-                        $1.2M
-                      </p>
-                    </div>
+                    <h3 className="text-xl font-bold text-surface-dark mb-3">
+                      {card.title}
+                    </h3>
+                    <p className="text-sm text-text-secondary leading-relaxed">
+                      {card.desc}
+                    </p>
                   </div>
-                  <p className="text-xs text-green-600 font-medium">
-                    In first 90 days
+                );
+              })}
+            </div>
+
+            {/* Product capability stats */}
+            <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto">
+              {[
+                { value: "97%", label: "Coding Accuracy" },
+                { value: "< 7 Days", label: "To Go Live" },
+                { value: "40+", label: "EHR Integrations" },
+              ].map((s) => (
+                <div key={s.label} className="text-center">
+                  <p className="text-2xl font-bold gradient-text">
+                    {s.value}
+                  </p>
+                  <p className="text-xs text-text-muted mt-1">
+                    {s.label}
                   </p>
                 </div>
-              </div>
+              ))}
             </div>
           </div>
         </section>
@@ -659,17 +603,17 @@ export default function DemoPage() {
               {faqs.map((faq, i) => (
                 <div
                   key={i}
-                  className="bg-white rounded-xl border border-gray-100 overflow-hidden"
+                  className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:border-gray-200 transition-colors"
                 >
                   <button
                     onClick={() => setOpenFaq(openFaq === i ? null : i)}
                     className="w-full flex items-center justify-between px-6 py-5 text-left"
                   >
-                    <span className="text-base font-semibold text-surface-dark pr-4">
+                    <span className="text-[15px] font-semibold text-surface-dark pr-4">
                       {faq.q}
                     </span>
                     <ChevronDown
-                      className={`w-5 h-5 text-text-muted shrink-0 transition-transform ${
+                      className={`w-5 h-5 text-text-muted shrink-0 transition-transform duration-200 ${
                         openFaq === i ? "rotate-180" : ""
                       }`}
                     />
@@ -691,6 +635,14 @@ export default function DemoPage() {
         <section className="py-24 bg-gradient-to-br from-indigo-600 via-indigo-700 to-slate-900 relative overflow-hidden">
           <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-400/10 rounded-full blur-3xl" />
           <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-400/10 rounded-full blur-3xl" />
+          <div
+            className="absolute inset-0 opacity-[0.04]"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle, rgba(255,255,255,0.8) 1px, transparent 1px)",
+              backgroundSize: "32px 32px",
+            }}
+          />
 
           <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-4xl sm:text-5xl font-bold text-white tracking-tight leading-tight">
@@ -699,7 +651,7 @@ export default function DemoPage() {
               <span className="text-cyan-300">revenue on the table?</span>
             </h2>
             <p className="mt-6 text-lg text-indigo-200 max-w-2xl mx-auto leading-relaxed">
-              Join 200+ healthcare organizations that trust Riveo Health to
+              See how Riveo Health can transform your revenue cycle —
               recover revenue, automate workflows, and eliminate denial
               headaches.
             </p>
@@ -725,7 +677,7 @@ export default function DemoPage() {
               </a>
             </div>
 
-            <div className="mt-10 flex items-center justify-center gap-8 text-sm text-indigo-300">
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-sm text-indigo-300">
               <span className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4" />
                 Free audit included

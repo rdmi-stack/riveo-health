@@ -60,3 +60,83 @@ body {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
+
+/* ---- Hero typing cursor ---- */
+.hero-cursor {
+  display: inline-block;
+  animation: blink-cursor 0.75s step-end infinite;
+  font-weight: 300;
+  margin-left: 2px;
+}
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ---- Hero card staggered entrance ---- */
+.hero-card-enter {
+  animation: hero-slide-up 0.8s ease-out both;
+}
+.hero-card-delay-1 { animation-delay: 0.2s; }
+.hero-card-delay-2 { animation-delay: 0.5s; }
+.hero-card-delay-3 { animation-delay: 0.8s; }
+
+@keyframes hero-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---- Hero particles ---- */
+.hero-particle {
+  position: absolute;
+  bottom: -10px;
+  border-radius: 50%;
+  background: rgba(6, 182, 212, 0.5);
+  animation: particle-rise linear infinite;
+}
+@keyframes particle-rise {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.4;
+  }
+  90% {
+    opacity: 0.1;
+  }
+  100% {
+    transform: translateY(-100vh) scale(0.5);
+    opacity: 0;
+  }
+}
+
+/* ---- Trusted-by marquee ---- */
+.hero-marquee-wrap {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+.hero-marquee {
+  display: flex;
+  gap: 1rem;
+  width: max-content;
+  animation: marquee-scroll 30s linear infinite;
+}
+@keyframes marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Activity feed fade transition helper */
+.transition-opacity.duration-400 {
+  transition-duration: 400ms;
+}
