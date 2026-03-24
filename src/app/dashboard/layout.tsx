@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   FileText,
@@ -54,8 +55,36 @@ const NAV_ITEMS = [
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ];
 
+// ── HIPAA Session Timeout (15 min inactivity) ──────────
+function useSessionTimeout() {
+  const router = useRouter();
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    const TIMEOUT = 15 * 60 * 1000; // 15 minutes
+
+    function resetTimer() {
+      clearTimeout(timer);
+      timer = setTimeout(async () => {
+        await fetch("/api/auth/me", { method: "DELETE" });
+        router.push("/login?reason=timeout");
+      }, TIMEOUT);
+    }
+
+    const events = ["mousedown", "keydown", "scroll", "touchstart"];
+    events.forEach(e => window.addEventListener(e, resetTimer));
+    resetTimer();
+
+    return () => {
+      clearTimeout(timer);
+      events.forEach(e => window.removeEventListener(e, resetTimer));
+    };
+  }, [router]);
+}
+
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  useSessionTimeout();
 
   return (
     <div className="flex h-screen bg-slate-950 text-white overflow-hidden">

@@ -9,6 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCollection, Collections } from "@/lib/mongodb";
 import { hashPassword, createToken, setAuthCookie } from "@/lib/auth";
 import { logAudit, getRequestMeta } from "@/lib/audit-logger";
+import { validatePassword } from "@/lib/compliance";
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,8 +23,9 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    if (password.length < 8) {
-      return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
+    const pwCheck = validatePassword(password);
+    if (!pwCheck.valid) {
+      return NextResponse.json({ error: `Password requirements: ${pwCheck.errors.join(", ")}` }, { status: 400 });
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json({ error: "Invalid email format" }, { status: 400 });
