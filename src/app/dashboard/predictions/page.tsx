@@ -68,7 +68,7 @@ export default function PredictionsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Denial Prediction</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Denial Prediction</h1>
           <p className="text-sm text-slate-400">AI scores each claim before submission — flag high-risk, fix before denied</p>
         </div>
         <button onClick={runPrediction} disabled={predicting || claims.length === 0}
@@ -111,7 +111,7 @@ export default function PredictionsPage() {
           {predictions.batchSummary && (
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
               <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-center">
-                <p className="text-2xl font-bold text-white">{predictions.batchSummary.totalClaims}</p>
+                <p className="text-2xl font-bold text-gray-900">{predictions.batchSummary.totalClaims}</p>
                 <p className="text-xs text-slate-500">Claims Scanned</p>
               </div>
               <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-center">

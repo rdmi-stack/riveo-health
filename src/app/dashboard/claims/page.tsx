@@ -55,10 +55,10 @@ export default function ClaimsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-white">Claims</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Claims</h1>
           <p className="text-sm text-slate-400">{pagination.total.toLocaleString()} total claims</p>
         </div>
-        <button onClick={exportCSV} className="flex items-center gap-2 px-4 py-2 text-xs rounded-lg border border-white/10 text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+        <button onClick={exportCSV} className="flex items-center gap-2 px-4 py-2 text-xs rounded-lg border border-white/10 text-slate-400 hover:text-gray-900 hover:bg-white/5 transition-all">
           <Download className="w-3.5 h-3.5" /> Export CSV
         </button>
       </div>
@@ -71,7 +71,7 @@ export default function ClaimsPage() {
             type="text" placeholder="Search claims..." value={search}
             onChange={e => setSearch(e.target.value)}
             onKeyDown={e => e.key === "Enter" && fetchClaims()}
-            className="w-full bg-transparent text-sm text-white placeholder:text-slate-600 focus:outline-none"
+            className="w-full bg-transparent text-sm text-gray-900 placeholder:text-slate-600 focus:outline-none"
           />
         </div>
         <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value); }}
@@ -133,7 +133,7 @@ export default function ClaimsPage() {
                       <td className="px-4 py-3 text-slate-300">{c.payer}</td>
                       <td className="px-4 py-3 font-mono text-xs text-slate-400">{c.cptCode}</td>
                       <td className="px-4 py-3 text-slate-400 text-xs">{c.provider}</td>
-                      <td className="px-4 py-3 text-right text-white font-medium">{fmt$(c.billedAmount)}</td>
+                      <td className="px-4 py-3 text-right text-gray-900 font-medium">{fmt$(c.billedAmount)}</td>
                       <td className="px-4 py-3 text-right text-slate-300">{fmt$(c.paidAmount)}</td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${sc.color}`}>
