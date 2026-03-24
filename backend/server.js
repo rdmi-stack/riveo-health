@@ -525,6 +525,36 @@ app.get("/api/statements", async (req, res) => {
   } catch (e) { res.status(500).json({ error: "Failed" }); }
 });
 
+// ── Deepgram Key (for browser WebSocket STT) ───────────
+app.get("/api/deepgram", (req, res) => {
+  const key = process.env.DEEPGRAM_API_KEY;
+  if (!key) return res.status(500).json({ error: "Deepgram not configured" });
+  res.json({ key });
+});
+
+// ── Transcribe (Whisper STT) ───────────────────────────
+const multer = require("multer");
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024 } });
+
+app.post("/api/transcribe", upload.single("audio"), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "audio file required" });
+
+    // Convert buffer to File-like object for OpenAI
+    const file = new File([req.file.buffer], "audio.webm", { type: req.file.mimetype || "audio/webm" });
+    const transcription = await openai.audio.transcriptions.create({
+      file: file,
+      model: "whisper-1",
+      language: "en",
+    });
+
+    res.json({ success: true, text: transcription.text });
+  } catch (e) {
+    console.error("Transcribe error:", e);
+    res.status(500).json({ error: "Transcription failed" });
+  }
+});
+
 // ── Catch-all for unimplemented routes ─────────────────
 app.use("/api", (req, res) => {
   res.status(404).json({ error: "Endpoint not found" });
