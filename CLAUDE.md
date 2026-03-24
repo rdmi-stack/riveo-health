@@ -68,7 +68,7 @@ Don't build software. Build a **revenue control system**.
 - **Architecture**: Microservices, event-driven, multi-tenant
 
 ### AI / LLM Layer
-- **Primary Model**: Claude Opus (Anthropic API) — reasoning, conversation, workflow intelligence
+- **Primary Model**: OpenAI GPT (GPT-4o / GPT-5.4) — reasoning, conversation, workflow intelligence
 - **Orchestration**: LangChain / LlamaIndex (or custom orchestrator)
 - **Voice STT**: Deepgram / Whisper
 - **Voice TTS**: ElevenLabs / Azure Speech
@@ -97,7 +97,7 @@ Frontend → Backend (secure layer) → Data Processor (mask/structure PHI) → 
 ### MVP Stack (Start With)
 | Layer | Tool |
 |-------|------|
-| AI | Claude Opus (Anthropic API) |
+| AI | OpenAI GPT-4o / GPT-5.4 |
 | Backend | FastAPI (Python) |
 | Frontend | Next.js 16 + React |
 | Database | MongoDB Atlas |
@@ -451,6 +451,255 @@ No AI-native company combining **Interaction + Revenue + Financial Infrastructur
 - **Never build without a client asking for it** (except core infrastructure)
 - **Every feature must show ROI** — if you can't tie it to dollars saved/recovered, don't build it
 - **Ship weekly** — small releases, continuous deployment
+
+---
+
+## Development Implementation Status
+
+### What's Built (Live & Working)
+
+#### M1: Foundation — COMPLETE
+- [x] Marketing website (29 pages) — Next.js 16 + TypeScript + Tailwind CSS 4
+- [x] Free Revenue Audit Tool (`/audit`) — client-side + GPT-5.4 API
+- [x] `.env.local` with MongoDB Atlas + OpenAI credentials
+- [x] MongoDB Atlas connection utility (`src/lib/mongodb.ts`)
+- [x] OpenAI GPT-5.4 client with PHI masking (`src/lib/openai.ts`)
+- [x] API: `GET /api/health` — MongoDB + OpenAI status check
+- [x] API: `POST /api/contact` — Contact form → MongoDB
+- [x] API: `POST /api/demo` — Demo request → MongoDB
+- [x] API: `POST /api/audit` — GPT-5.4 revenue audit analysis → MongoDB
+- [x] Contact + Demo forms connected to backend
+- [x] Navbar with "Free Audit" CTA
+- [x] Playwright tests (45 passing)
+
+#### M2: Wedge MVP — 85% COMPLETE
+- [x] MongoDB schemas: claims, denials, payers, organizations
+- [x] API: `GET/POST /api/claims` — List with filters/search/pagination, create
+- [x] API: `POST /api/claims/import` — Bulk CSV import + auto-denial detection
+- [x] API: `GET/PATCH /api/denials` — List with filters, update status
+- [x] API: `POST /api/denials/analyze` — GPT-5.4 AI denial analysis (explanation, fix steps, appeal likelihood, recovery estimate)
+- [x] API: `GET /api/analytics` — Aggregated dashboard stats
+- [x] API: `GET /api/seed` — Demo data seeder (500 claims, 58 denials, 6 payers)
+- [x] Dashboard layout — sidebar nav, header, search, notifications
+- [x] Dashboard Overview (`/dashboard`) — stat cards, denial breakdown, payer analysis, recent denials, monthly trend
+- [x] Claims page (`/dashboard/claims`) — table with search, status/payer filters, pagination, CSV export
+- [x] Denials page (`/dashboard/denials`) — queue with priority, expandable detail, AI Fix button, status management
+- [x] Analytics page (`/dashboard/analytics`) — collection rate, denial rate, status bars, payer performance, monthly trend
+- [x] Import page (`/dashboard/import`) — drag & drop CSV import
+- [x] Settings page (`/dashboard/settings`) — org info, notifications, compliance badges
+
+### What's Pending (Build Priority Order)
+
+#### M2 Remaining (Complete the MVP)
+
+| # | Feature | Description | Complexity | Status |
+|:-:|---------|-------------|:----------:|:------:|
+| 1 | **Auth system** | Login/signup with JWT tokens, password hashing (bcrypt), session management, protected routes | Medium | Not built |
+| 2 | **Role-based access (RBAC)** | Roles: admin, billing_manager, biller, viewer. Route + API protection per role | Medium | Not built |
+| 3 | **Client onboarding wizard** | Step-by-step: create org → invite users → import data → configure settings → go live | Medium | Not built |
+| 4 | **Audit log** | Log every user action (HIPAA requirement): who did what, when, to which record, from which IP | Easy | Not built |
+| 5 | **Notification system** | In-app + email alerts for: new denials, high-value denials, status changes, weekly summaries | Medium | Not built |
+| 6 | **EHR integration (1 system)** | Connect to athenahealth (or client's EHR) via HL7 FHIR API to sync claims/patients | Hard | Not built |
+
+#### M3: AI Engine & Patient Interaction
+
+| # | Feature | Description | Complexity | Status |
+|:-:|---------|-------------|:----------:|:------:|
+| 7 | **AI auto-coding** | Clinical notes → ICD-10/CPT code suggestions with confidence scores using GPT-5.4 | Medium | Not built |
+| 8 | **Denial prediction model** | Score each claim 0-100 risk before submission, flag high-risk with fix suggestions | Medium | Not built |
+| 9 | **Patient chat agent** | Embeddable chat widget for patient billing questions, powered by GPT-5.4 | Medium | Not built |
+| 10 | **SMS agent** | Twilio-powered payment reminders, appointment confirmations, billing notifications | Medium | Not built |
+| 11 | **WhatsApp agent** | WhatsApp Cloud API — same as SMS but on WhatsApp (critical for India market) | Medium | Not built |
+| 12 | **Email agent** | Automated billing statements, payment reminders, overdue notices | Easy | Not built |
+| 13 | **Payment link generation** | Stripe (US) / Razorpay (India) — create secure pay-now links sent via SMS/WhatsApp/email | Medium | Not built |
+| 14 | **Auto-resubmission workflow** | AI fixes denied claim → human approval queue → auto-submit corrected claim | Hard | Not built |
+| 15 | **Payment posting automation** | Match ERA/835 payments to claims, flag underpayments automatically | Hard | Not built |
+| 16 | **Automated follow-up sequences** | Unpaid claims auto-follow-up at 15/30/45/60 days via email + payer API | Medium | Not built |
+| 17 | **2 more EHR integrations** | Add eClinicalWorks + 1 more (total: 3 EHR systems) | Hard | Not built |
+
+#### M4: Platform — White-Label & API
+
+| # | Feature | Description | Complexity | Status |
+|:-:|---------|-------------|:----------:|:------:|
+| 18 | **White-label system** | Custom branding (logo, colors, domain) per tenant for RCM companies | Hard | Not built |
+| 19 | **Public REST API** | Full claims/denials/analytics API with Swagger/OpenAPI documentation | Medium | Not built |
+| 20 | **API authentication** | API keys, OAuth 2.0, rate limiting, usage tracking per partner | Medium | Not built |
+| 21 | **Webhook system** | Notify partners of claim status changes, denials, payments via webhooks | Medium | Not built |
+| 22 | **Prior authorization automation** | Submit PA requests, track status, auto-follow-up with payers | Hard | Not built |
+| 23 | **Contract underpayment detection** | Compare every payment vs contracted rates, auto-flag underpayments | Medium | Not built |
+| 24 | **Advanced reporting** | 50+ report templates, custom report builder, scheduled email reports | Hard | Not built |
+| 25 | **Role-based dashboards** | Different views: Admin, Biller, Manager, Provider, Executive | Medium | Not built |
+| 26 | **Credentialing tracker** | Provider credentialing status, expiration alerts, auto-renewal reminders | Medium | Not built |
+| 27 | **5 more EHR integrations** | Total: 8 EHR systems connected | Hard | Not built |
+| 28 | **SOC 2 Type II audit prep** | Policies, procedures, evidence collection for certification | External | Not started |
+
+#### M5: Scale — 200+ Clients
+
+| # | Feature | Description | Complexity | Status |
+|:-:|---------|-------------|:----------:|:------:|
+| 29 | **Mobile app** | Practice owners see revenue, denials, alerts on phone (React Native/Expo) | Hard | Not built |
+| 30 | **Benchmarking engine** | Compare client metrics vs industry and peer group (anonymized) | Medium | Not built |
+| 31 | **Revenue forecasting** | AI predicts next 30/60/90 day collections | Medium | Not built |
+| 32 | **Claims routing optimization** | Smart clearinghouse selection per claim for faster payment | Hard | Not built |
+| 33 | **Self-service onboarding** | Client signs up → imports data → goes live without manual help | Medium | Not built |
+| 34 | **Kafka event streaming** | Decouple services, event-driven architecture for scale | Hard | Not built |
+| 35 | **Elasticsearch** | Full-text search across claims, patients, notes | Medium | Not built |
+| 36 | **12 more EHR integrations** | Total: 20+ EHR systems | Hard | Not built |
+
+#### M6: Financial Infrastructure — $1B ARR Path
+
+| # | Feature | Description | Complexity | Status |
+|:-:|---------|-------------|:----------:|:------:|
+| 37 | **Payment processing layer** | Process patient payments, take % of transaction (Stripe Connect / Razorpay) | Hard | Not built |
+| 38 | **Claims clearinghouse** | Route claims directly to payers, bypass intermediaries | Very Hard | Not built |
+| 39 | **Patient financing** | Offer payment plans, partner with lending providers | Hard | Not built |
+| 40 | **Payer contract negotiation AI** | Analyze contracts, benchmark rates, suggest better terms | Hard | Not built |
+| 41 | **App marketplace** | Third-party integrations and apps on Riveo platform | Hard | Not built |
+| 42 | **Multi-region deployment** | US + India + international markets with data residency | Hard | Not built |
+
+### Tech Stack (Current Production)
+
+```
+Frontend:   Next.js 16 + TypeScript + Tailwind CSS 4 (Vercel-ready)
+Backend:    Next.js API Routes (will migrate to FastAPI for M3+)
+Database:   MongoDB Atlas (cloud)
+AI:         OpenAI GPT-5.4 (via API)
+Cache:      Redis (add at M3)
+Payments:   Stripe / Razorpay (add at M3)
+SMS:        Twilio (add at M3)
+WhatsApp:   WhatsApp Cloud API (add at M3)
+Search:     Elasticsearch (add at M5)
+Streaming:  Kafka (add at M5)
+Hosting:    Vercel (frontend) + AWS (backend at M4+)
+CI/CD:      GitHub Actions
+Monitoring: Sentry (add at deployment)
+CRM:        HubSpot (free)
+```
+
+### Recently Built (M2+)
+
+**Dashboard** (13 pages): Overview, Claims, Denials, Auto-Resubmit, Denial Prediction, AI Coding, Prior Auth, Patient Chat, EHR Connect, Analytics, Import, Settings, Onboarding
+
+**APIs** (15 endpoints): health, contact, demo, audit, claims, claims/import, claims/predict, denials, denials/analyze, analytics, resubmit, prior-auth, ehr, white-label, chat, audit-log, seed
+
+**Auth**: JWT + bcrypt + httpOnly cookies + middleware + RBAC (admin, billing_manager, biller, viewer)
+
+**AI Features**: GPT-5.4 powered — denial analysis, auto-coding, denial prediction, prior auth generation, patient chat, revenue audit
+
+---
+
+## Competitive Feature Roadmap (Competitor Research-Backed)
+
+Based on analysis of 20 competitors: Waystar, Athenahealth, R1 RCM, Ensemble, Availity, Experian Health, Change Healthcare, Akasa, Olive AI, Nym Health, Fathom, Abridge, Cedar, Collectly, Salucro, PatientPay, Tebra, DrChrono, CureMD, SimplePractice.
+
+### 80/20 Priority: Features That Drive Revenue (Build Order)
+
+#### P0 — Build Immediately (Highest ROI, customers ask for these first)
+
+| # | Feature | Why 80/20 | Source Competitor | Build Effort |
+|:-:|---------|-----------|-------------------|:------------:|
+| 1 | **Contract Underpayment Detection** | Providers lose 1-3% of revenue to underpayments and never catch it. Pure found money — no workflow change needed. Every payment compared against contracted rates, variances flagged, appeals auto-generated | R1 RCM, Change HC, Ensemble | 3-4 days |
+| 2 | **Charge Capture Audit** | Find services performed but never billed. Average hospital leaks $2-5M/year in missed charges. Compare clinical docs vs submitted claims to find the gap | Ensemble, R1 RCM | 3-4 days |
+| 3 | **Personalized Patient Billing Engine** | AI picks optimal channel (SMS/email/mail), timing, message, and payment plan per patient. Increases collections 20-30%. Patient responsibility is 30%+ of revenue and growing | Cedar, Collectly | 3-4 days |
+| 4 | **Explainable Coding with Evidence Highlighting** | For every AI-suggested code, show the exact clinical text that supports it. Critical for audit defense, compliance, and building trust in AI coding | Nym Health | 2 days |
+| 5 | **Pre-Collection Engagement Workflow** | Automated escalation (digital bill → text → email → payment plan → hardship screening) before sending to external collections. Recovers 3-5x more than collection agencies who take 25-40% | Collectly, Cedar | 2-3 days |
+
+#### P1 — Build Next (High value, growing demand)
+
+| # | Feature | Why 80/20 | Source Competitor | Build Effort |
+|:-:|---------|-----------|-------------------|:------------:|
+| 6 | **Payer Rules Intelligence Database** | Auto-updating database of payer-specific rules. When one client encounters a rule change, fix propagates to all. Becomes a moat with every new client — Athenahealth's #1 competitive advantage | Athenahealth, Waystar | 5-7 days |
+| 7 | **Coverage Discovery** | For self-pay patients, search for active insurance they didn't disclose (Medicaid, employer, VA). Average recovery $5K-$10K per found policy. Hospitals write off billions that could be billed | Experian, Waystar | 4-5 days |
+| 8 | **Claim Attachment Automation** | AI identifies when a claim needs supporting docs, pulls from EHR, formats per payer requirements, attaches before submission. Missing attachments = top 5 denial reason | Waystar | 3-4 days |
+| 9 | **CDI AI (Clinical Documentation Integrity)** | AI reviews clinical notes pre-billing, suggests documentation improvements that support higher (accurate) coding. Queries physicians when documentation is ambiguous. Increases revenue 2-5% | R1 RCM, Fathom | 3-4 days |
+| 10 | **Coding Audit (AI Second Reviewer)** | After auto-coding, a separate AI pass reviews for accuracy, compliance risk, and bundling issues. Quality assurance layer — distinct from auto-coding | Akasa, Nym Health | 2-3 days |
+
+#### P2 — Build Strategically (Differentiators + enterprise requirements)
+
+| # | Feature | Why 80/20 | Source Competitor | Build Effort |
+|:-:|---------|-----------|-------------------|:------------:|
+| 11 | **Revenue Guarantee Pricing Model** | "We increase your collections by X% or refund the difference." Eliminates buyer risk, accelerates sales 2-3x. Business model change, not a feature | Ensemble | 0 days (GTM) |
+| 12 | **Human-in-the-Loop Architecture** | AI escalates edge cases to humans with full context. Human resolution retrains the model. Continuous improvement loop. Required for enterprise trust | Akasa | 3-4 days |
+| 13 | **Financial Assistance Screening (501r)** | Auto-screen patients for charity care, Medicaid eligibility. Regulatory requirement for nonprofit hospitals. Reduces bad debt | Salucro, Experian | 2-3 days |
+| 14 | **No Surprises Act Compliance** | Auto-generate Good Faith Estimates, detect surprise billing, manage dispute resolution. Federal regulatory requirement | Salucro, Waystar | 2-3 days |
+| 15 | **Payer Performance Benchmarking** | Compare client's payer metrics vs anonymized peer data from all Riveo clients. Powerful for contract negotiations. Value grows with client base | Athenahealth, Waystar | 2-3 days |
+| 16 | **Remittance Processing AI** | AI reads EOBs/ERAs in all formats (835, PDF, scanned), posts payments, flags discrepancies, reconciles with expected. Replaces 2-3 FTEs per org | Akasa, R1 RCM | 4-5 days |
+| 17 | **Patient Reputation Management** | AI-powered review solicitation, response generation, reputation monitoring. No RCM company does this — unique positioning. Revenue starts with patient volume | Tebra | 3-4 days |
+| 18 | **Consolidated Multi-Provider Billing** | Aggregate all patient bills from multiple providers into one unified bill. Patients hate getting 5 bills for one visit. Increases payment rates | Cedar | 3-4 days |
+| 19 | **Specialty-Specific Coding Models** | Separate AI coding models for ED, orthopedics, cardiology, radiology. Generic coding AI underperforms in specialized areas. ED visits alone are undercoded by 5-15% | Nym, Ensemble | 4-5 days |
+| 20 | **Patient-Facing Visit Summary** | Plain-language summary of visit + billing explanation sent to patient after appointment. Reduces billing call-backs by 40% | Abridge | 2 days |
+
+### Features We Already Have (vs Competitors)
+
+| Feature | Riveo | Waystar | Athena | R1 | Akasa | Cedar |
+|---------|:-----:|:-------:|:------:|:--:|:-----:|:-----:|
+| AI Denial Analysis | Yes | Yes | No | Partial | Yes | No |
+| AI Auto-Coding | Yes | No | No | No | Partial | No |
+| Denial Prediction | Yes | Yes | Partial | No | No | No |
+| Prior Auth Automation | Yes | Yes | Partial | Partial | Yes | No |
+| Patient Chat Agent | Yes | No | No | No | No | No |
+| Auto-Resubmission | Yes | Partial | No | Manual | Partial | No |
+| Free Revenue Audit Tool | Yes | No | No | No | No | No |
+| EHR Integration | Yes (6) | Yes (40+) | Built-in | Yes | Yes | Partial |
+| White-Label | Yes | No | No | No | No | No |
+| Month-to-Month Pricing | Yes | No | Yes | No | No | No |
+
+### Key Competitive Insights
+
+1. **Athenahealth's moat is their network intelligence** — payer rules learned from 160K+ providers. Riveo builds this by collecting denial patterns across all clients from day 1
+2. **Cedar's moat is personalized billing** — ML optimizes every patient touchpoint. Riveo should treat patient billing as a personalization problem, not a notification problem
+3. **R1/Ensemble's value is contract underpayment recovery** — found money that requires no workflow change. Highest ROI feature for enterprises
+4. **Nym's differentiator is explainable coding** — evidence-linked code suggestions build trust. Riveo's AI coding needs this to win compliance-conscious buyers
+5. **Akasa's architecture (human-in-the-loop)** is the most trusted AI approach in healthcare — AI handles 80%, escalates 20%, learns from every escalation
+6. **No competitor combines all AI features in one platform** — Riveo's advantage is being the unified AI-native RCM OS, not the best at any single feature
+
+### Codebase Structure
+
+```
+src/
+├── app/
+│   ├── api/                    # Backend API routes
+│   │   ├── health/route.ts     # Health check
+│   │   ├── contact/route.ts    # Contact form → MongoDB
+│   │   ├── demo/route.ts       # Demo request → MongoDB
+│   │   ├── audit/route.ts      # GPT-5.4 audit → MongoDB
+│   │   ├── claims/
+│   │   │   ├── route.ts        # Claims CRUD
+│   │   │   └── import/route.ts # CSV bulk import
+│   │   ├── denials/
+│   │   │   ├── route.ts        # Denials CRUD
+│   │   │   └── analyze/route.ts# GPT-5.4 denial analysis
+│   │   ├── analytics/route.ts  # Dashboard aggregations
+│   │   └── seed/route.ts       # Demo data seeder
+│   ├── dashboard/              # Client dashboard (protected)
+│   │   ├── layout.tsx          # Sidebar + header layout
+│   │   ├── page.tsx            # Overview
+│   │   ├── claims/page.tsx     # Claims management
+│   │   ├── denials/page.tsx    # Denial queue + AI fix
+│   │   ├── analytics/page.tsx  # Reports & charts
+│   │   ├── import/page.tsx     # CSV import
+│   │   └── settings/page.tsx   # Org settings
+│   ├── audit/page.tsx          # Free revenue audit tool
+│   ├── demo/page.tsx           # Request demo
+│   ├── contact/page.tsx        # Contact form
+│   ├── blog/                   # Blog listing + articles
+│   ├── platform/               # 6 platform pages
+│   ├── solutions/              # 5 solution pages
+│   └── [other marketing pages]
+├── lib/
+│   ├── mongodb.ts              # MongoDB connection + collection helpers
+│   ├── openai.ts               # GPT-5.4 client + system prompts + PHI masking
+│   ├── audit-engine.ts         # Client-side audit analysis engine
+│   └── seed-demo.ts            # Demo data generator
+├── types/
+│   └── audit.ts                # TypeScript types for audit tool
+├── components/
+│   ├── Navbar.tsx              # Site navigation
+│   ├── Footer.tsx              # Site footer
+│   └── [other marketing components]
+└── data/
+    └── blog.ts                 # Blog content
+```
 
 ---
 
