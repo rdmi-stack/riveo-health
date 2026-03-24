@@ -46,20 +46,12 @@ export default function VoiceDemoPage() {
   useEffect(() => { historyRef.current = history; }, [history]);
   useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }); }, [history]);
 
-  // Check mic permission on page load — only show modal if truly denied
-  useEffect(() => {
-    if (navigator.permissions) {
-      navigator.permissions.query({ name: "microphone" as PermissionName }).then(result => {
-        if (result.state === "denied") setShowMicHelp(true);
-        // "prompt" or "granted" = don't show modal, browser will handle it
-      }).catch(() => {}); // permissions API not supported, skip
-    }
-  }, []);
+  // No modal on load — browser handles mic permission natively
 
   async function startCall() {
     setCallActive(true); setCallState("connecting"); setHistory([]); setCallDuration(0); shouldListenRef.current = true;
     callTimerRef.current = setInterval(() => setCallDuration(d => d + 1), 1000);
-    try { streamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch { setCallState("idle"); setCallActive(false); setShowMicHelp(true); return; }
+    try { streamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch { setCallState("idle"); setCallActive(false); return; }
     setTimeout(() => { const g = { role: "ai", text: GREETING }; setHistory([g]); historyRef.current = [g]; aiSpeak(GREETING); }, 500);
   }
 
