@@ -54,6 +54,7 @@ export default function VoiceDemoPage() {
     setCallState("connecting");
     setHistory([]);
     setCallDuration(0);
+    setMicError("");
     shouldListenRef.current = true;
 
     // Start call timer
@@ -215,6 +216,7 @@ export default function VoiceDemoPage() {
 
     recognition.onaudiostart = () => {
       setCallState("listening");
+      setMicError(""); // Clear any previous error
     };
 
     recognitionRef.current = recognition;
