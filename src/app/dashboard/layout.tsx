@@ -14,6 +14,7 @@ import {
 const NAV_GROUPS = [
   { label: "Core", items: [
     { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+    { href: "/dashboard/eligibility", label: "Eligibility", icon: ShieldCheck },
     { href: "/dashboard/claims", label: "Claims", icon: FileText },
     { href: "/dashboard/denials", label: "Denials", icon: AlertTriangle },
     { href: "/dashboard/resubmit", label: "Auto-Resubmit", icon: RefreshCw },

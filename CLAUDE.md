@@ -644,6 +644,42 @@ Based on analysis of 20 competitors: Waystar, Athenahealth, R1 RCM, Ensemble, Av
 | White-Label | Yes | No | No | No | No | No |
 | Month-to-Month Pricing | Yes | No | Yes | No | No | No |
 
+### Product Plan — Features Still Needed (Competitor Research, March 2026)
+
+Based on analysis of Waystar, R1 RCM, Cedar, Collectly, Experian Health, Availity, Tebra, Nym Health homepages and solution pages.
+
+#### Table Stakes (Every competitor has these — clients expect them on day 1)
+
+| # | Feature | Who Leads | Status |
+|:-:|---------|-----------|:------:|
+| 1 | **Real-time Eligibility Verification** — Auto-verify insurance at scheduling + check-in, find secondary coverage | Waystar, Experian, Tebra, Collectly, Availity | Not built |
+| 2 | **Patient Estimation / Price Transparency** — Show patients out-of-pocket cost before visit (No Surprises Act) | Waystar, Experian, R1 (Phare Access) | Not built |
+| 3 | **Patient Self-Service Portal** — Patients view bills, make payments, set up plans, message staff | Cedar, Collectly, Tebra | Not built |
+| 4 | **Digital Statements + Text-to-Pay** — Replace paper bills. Patient gets text → clicks → pays. 70% pay within 48hrs | Collectly (#1 feature), Cedar | Not built |
+| 5 | **ERA/Remittance Auto-Posting** — AI reads EOBs/ERAs, posts payments, flags discrepancies. Saves 2-3 FTEs | Waystar, R1 (Phare Flow), Tebra (RPA) | Not built |
+
+#### High Priority (Differentiators that win competitive demos)
+
+| # | Feature | Who Leads | Status |
+|:-:|---------|-----------|:------:|
+| 6 | **Claim Scrubber (Rules Engine)** — Deterministic rule-based scrub before submission (not AI prediction — hard rules) | Experian (ClaimSource), Waystar | Not built |
+| 7 | **Digital Check-In / Patient Intake** — Mobile pre-visit registration, insurance card scan, consent forms | Collectly, Tebra, R1 | Not built |
+| 8 | **Appointment Scheduling + Reminders** — Online booking, text/email/phone reminders, no-show tracking | Tebra, Collectly, Athenahealth | Not built |
+| 9 | **Claims Status Auto-Polling** — Continuously check claim status with payers, surface claims needing action | Waystar, Availity, Akasa | Not built |
+| 10 | **AI Voice Agent (Inbound Calls)** — AI handles patient billing phone calls, not just chat | Cedar (Kora AI) | Not built |
+
+#### Strategic (Enterprise requirements)
+
+| # | Feature | Who Leads | Status |
+|:-:|---------|-----------|:------:|
+| 11 | **DRG / Charge Integrity Validation** — Detect DRG anomalies, charge errors (hospitals) | Waystar | Not built |
+| 12 | **Registration QA** — AI checks patient registration data for errors before claims | Waystar, R1 | Not built |
+| 13 | **Utilization Management** — Track medical necessity reviews and payer authorizations | Waystar, Availity | Not built |
+| 14 | **Quality + Compliance Reporting** — MIPS, HEDIS, CMS quality measures | Waystar, Tebra | Not built |
+| 15 | **Multi-Payer Connectivity Network** — Single connection to all payers | Availity (13B transactions/yr) | Not built |
+| 16 | **Practice Website + SEO + Marketing** — Website builder, reputation management, AI review responses | Tebra (unique — no other RCM has this) | Not built |
+| 17 | **Telehealth Integration** — HIPAA video visits with auto-billing | Tebra, DrChrono | Not built |
+
 ### Key Competitive Insights
 
 1. **Athenahealth's moat is their network intelligence** — payer rules learned from 160K+ providers. Riveo builds this by collecting denial patterns across all clients from day 1

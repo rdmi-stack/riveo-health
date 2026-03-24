@@ -1,0 +1,157 @@
+# Page snapshot
+
+```yaml
+- main [ref=e2]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - img [ref=e6]
+      - text: "The average practice loses $300K-$500K/year to billing errors — Source: HFMA"
+    - heading "How Much Revenue Is Your Practice Losing?" [level=1] [ref=e8]:
+      - text: How Much Revenue Is
+      - text: Your Practice Losing?
+    - paragraph [ref=e9]: Get a detailed revenue leakage report in 60 seconds. See exactly where money is falling through the cracks — denied claims, undercoding, underpayments, and more.
+    - generic [ref=e10]:
+      - button "Get My Free Audit" [ref=e11]:
+        - text: Get My Free Audit
+        - img [ref=e12]
+      - button "Upload Claims CSV" [ref=e14]:
+        - img [ref=e15]
+        - text: Upload Claims CSV
+  - generic [ref=e19]:
+    - heading "What Your Free Audit Reveals" [level=2] [ref=e20]
+    - generic [ref=e21]:
+      - generic [ref=e22]:
+        - img [ref=e24]
+        - heading "Exact Dollar Leakage" [level=3] [ref=e27]
+        - paragraph [ref=e28]: See the precise annual amount your practice is losing to denied claims, undercoding, charge capture failures, and payer underpayments.
+      - generic [ref=e29]:
+        - img [ref=e31]
+        - heading "Denial Root Causes" [level=3] [ref=e34]
+        - paragraph [ref=e35]: Breakdown by CARC code showing which denial reasons cost you the most — and which ones are easily fixable vs hard to recover.
+      - generic [ref=e36]:
+        - img [ref=e38]
+        - heading "ROI Recovery Plan" [level=3] [ref=e41]
+        - paragraph [ref=e42]: Prioritized recommendations with projected savings per action item. Know exactly what to fix first for maximum revenue impact.
+  - generic [ref=e44]:
+    - heading "How It Works" [level=2] [ref=e45]
+    - generic [ref=e46]:
+      - generic [ref=e47]:
+        - generic [ref=e48]: "1"
+        - heading "Enter Your Numbers" [level=3] [ref=e49]
+        - paragraph [ref=e50]: Physicians, revenue, denial rate, claims volume. Takes 60 seconds. No login required.
+      - generic [ref=e51]:
+        - generic [ref=e52]: "2"
+        - heading "AI Analyzes Instantly" [level=3] [ref=e53]
+        - paragraph [ref=e54]: Our engine benchmarks your practice against industry data from MGMA, HFMA, AAPC, and 50M+ claims.
+      - generic [ref=e55]:
+        - generic [ref=e56]: "3"
+        - heading "Get Your Report" [level=3] [ref=e57]
+        - paragraph [ref=e58]: Detailed leakage report with dollar amounts, denial breakdown, payer analysis, and prioritized fix plan.
+  - generic [ref=e61]:
+    - heading "The Revenue Leakage Crisis" [level=2] [ref=e62]
+    - generic [ref=e63]:
+      - generic [ref=e64]:
+        - paragraph [ref=e65]: 60%
+        - paragraph [ref=e66]: of denials are never reworked
+        - paragraph [ref=e67]: "Source: HFMA"
+      - generic [ref=e68]:
+        - paragraph [ref=e69]: $25-$118
+        - paragraph [ref=e70]: cost to rework each denial
+        - paragraph [ref=e71]: "Source: AAPC"
+      - generic [ref=e72]:
+        - paragraph [ref=e73]: 34%
+        - paragraph [ref=e74]: of healthcare spend is admin
+        - paragraph [ref=e75]: "Source: Annals of Internal Medicine"
+      - generic [ref=e76]:
+        - paragraph [ref=e77]: 30-40%
+        - paragraph [ref=e78]: of providers undercode
+        - paragraph [ref=e79]: "Source: AAPC"
+  - generic [ref=e81]:
+    - heading "Riveo Audit vs Hiring a Consultant" [level=2] [ref=e82]
+    - generic [ref=e83]:
+      - generic [ref=e84]:
+        - heading "Traditional Revenue Audit" [level=3] [ref=e85]
+        - list [ref=e86]:
+          - listitem [ref=e87]:
+            - img [ref=e88]
+            - text: $5,000 - $15,000 per audit
+          - listitem [ref=e92]:
+            - img [ref=e93]
+            - text: Takes 4-8 weeks to complete
+          - listitem [ref=e97]:
+            - img [ref=e98]
+            - text: Manual spreadsheet analysis
+          - listitem [ref=e102]:
+            - img [ref=e103]
+            - text: One-time snapshot, outdated immediately
+          - listitem [ref=e107]:
+            - img [ref=e108]
+            - text: Generic recommendations
+          - listitem [ref=e112]:
+            - img [ref=e113]
+            - text: Must share PHI with third party
+      - generic [ref=e117]:
+        - generic [ref=e118]:
+          - heading "Riveo Free Audit" [level=3] [ref=e119]
+          - text: Free
+        - list [ref=e120]:
+          - listitem [ref=e121]:
+            - img [ref=e122]
+            - text: 100% free, no commitment
+          - listitem [ref=e125]:
+            - img [ref=e126]
+            - text: Results in 60 seconds
+          - listitem [ref=e129]:
+            - img [ref=e130]
+            - text: AI-powered analysis (GPT + 50M+ claims data)
+          - listitem [ref=e133]:
+            - img [ref=e134]
+            - text: Benchmarked against MGMA, HFMA, AAPC data
+          - listitem [ref=e137]:
+            - img [ref=e138]
+            - text: Prioritized action plan with dollar amounts
+          - listitem [ref=e141]:
+            - img [ref=e142]
+            - text: Data stays in your browser — HIPAA safe
+  - generic [ref=e146]:
+    - heading "Frequently Asked Questions" [level=2] [ref=e147]
+    - group [ref=e148]:
+      - generic "Is this really free?" [ref=e149]:
+        - text: Is this really free?
+        - img [ref=e150]
+    - group [ref=e152]:
+      - generic "Do I need to share patient data?" [ref=e153]:
+        - text: Do I need to share patient data?
+        - img [ref=e154]
+    - group [ref=e156]:
+      - generic "How accurate is the analysis?" [ref=e157]:
+        - text: How accurate is the analysis?
+        - img [ref=e158]
+    - group [ref=e160]:
+      - generic "What do I do with the results?" [ref=e161]:
+        - text: What do I do with the results?
+        - img [ref=e162]
+    - group [ref=e164]:
+      - generic "How is this different from my billing software's reports?" [ref=e165]:
+        - text: How is this different from my billing software's reports?
+        - img [ref=e166]
+  - generic [ref=e169]:
+    - heading "Stop Guessing. Start Recovering." [level=2] [ref=e170]
+    - paragraph [ref=e171]: Every day you wait, your practice loses $800-$1,400 to revenue leakage.
+    - button "Get My Free Audit Now" [ref=e172]:
+      - text: Get My Free Audit Now
+      - img [ref=e173]
+    - generic [ref=e175]:
+      - generic [ref=e176]:
+        - img [ref=e177]
+        - text: HIPAA Safe
+      - generic [ref=e179]:
+        - img [ref=e180]
+        - text: No PHI Required
+      - generic [ref=e183]:
+        - img [ref=e184]
+        - text: 60 Seconds
+      - generic [ref=e187]:
+        - img [ref=e188]
+        - text: No Credit Card
+```
