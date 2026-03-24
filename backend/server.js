@@ -4,9 +4,8 @@ const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const { MongoClient, ObjectId } = require("mongodb");
-const OpenAI = require("openai");
 const bcrypt = require("bcryptjs");
-const { SignJWT, jwtVerify } = require("jose");
+const jwt = require("jsonwebtoken");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -32,8 +31,12 @@ async function connectDB() {
 
 function col(name) { return db.collection(name); }
 
-// ── OpenAI ─────────────────────────────────────────────
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// ── OpenAI (dynamic import — ESM package) ──────────────
+let openai;
+async function initOpenAI() {
+  const { default: OpenAI } = await import("openai");
+  openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+}
 
 async function chat(system, user, opts = {}) {
   const res = await openai.chat.completions.create({
@@ -47,14 +50,14 @@ async function chat(system, user, opts = {}) {
 }
 
 // ── JWT ────────────────────────────────────────────────
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "riveo-dev-secret");
+const JWT_SECRET = process.env.JWT_SECRET || "riveo-dev-secret";
 
-async function createToken(payload) {
-  return new SignJWT(payload).setProtectedHeader({ alg: "HS256" }).setIssuedAt().setExpirationTime("8h").sign(JWT_SECRET);
+function createToken(payload) {
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: "8h" });
 }
 
-async function verifyToken(token) {
-  try { const { payload } = await jwtVerify(token, JWT_SECRET); return payload; } catch { return null; }
+function verifyToken(token) {
+  try { return jwt.verify(token, JWT_SECRET); } catch { return null; }
 }
 
 // ── PHI Masking ────────────────────────────────────────
@@ -561,7 +564,7 @@ app.get("/", (req, res) => {
 });
 
 // ── Start ──────────────────────────────────────────────
-connectDB().then(() => {
+Promise.all([connectDB(), initOpenAI()]).then(() => {
   app.listen(PORT, () => console.log(`Riveo Health API running on port ${PORT}`));
 }).catch(err => {
   console.error("Failed to connect to MongoDB:", err);
