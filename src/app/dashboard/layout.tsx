@@ -8,13 +8,14 @@ import {
   Activity, LogOut, Bell, Search, Shield, Brain, ShieldCheck,
   MessageSquare, RefreshCw, Plug, CircleDollarSign, SearchCheck, UserCheck,
   ListChecks, BookOpen, Radar, FileScan, ShieldAlert, ChevronDown,
-  PanelLeftClose, PanelLeft, HelpCircle, CheckCircle, X,
+  PanelLeftClose, PanelLeft, HelpCircle, CheckCircle, X, Calculator,
 } from "lucide-react";
 
 const NAV_GROUPS = [
   { label: "Core", items: [
     { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
     { href: "/dashboard/eligibility", label: "Eligibility", icon: ShieldCheck },
+    { href: "/dashboard/estimates", label: "Estimates", icon: Calculator },
     { href: "/dashboard/claims", label: "Claims", icon: FileText },
     { href: "/dashboard/denials", label: "Denials", icon: AlertTriangle },
     { href: "/dashboard/resubmit", label: "Auto-Resubmit", icon: RefreshCw },
