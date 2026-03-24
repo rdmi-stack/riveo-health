@@ -4,13 +4,11 @@
 
 import OpenAI from "openai";
 
-const apiKey = process.env.OPENAI_API_KEY;
+const apiKey = process.env.OPENAI_API_KEY || "";
 
-if (!apiKey) {
-  throw new Error("OPENAI_API_KEY is not defined in environment variables");
-}
-
-const openai = new OpenAI({ apiKey });
+// Don't throw at module load — breaks build-time static generation
+// Errors surface at runtime when chatCompletion() is called
+const openai = apiKey ? new OpenAI({ apiKey }) : null;
 
 export default openai;
 
@@ -76,6 +74,7 @@ export async function chatCompletion(
     responseFormat?: "text" | "json";
   }
 ) {
+  if (!openai) throw new Error("OpenAI API key not configured");
   const response = await openai.chat.completions.create({
     model: options?.model || "gpt-5.4",
     messages: [

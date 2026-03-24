@@ -7,7 +7,11 @@ import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 
-const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "riveo-health-secret-change-me");
+const jwtSecret = process.env.JWT_SECRET;
+if (!jwtSecret && process.env.NODE_ENV === "production") {
+  throw new Error("JWT_SECRET must be set in production");
+}
+const JWT_SECRET = new TextEncoder().encode(jwtSecret || "riveo-dev-secret-not-for-production");
 const TOKEN_NAME = "riveo_token";
 const TOKEN_EXPIRY = "7d";
 

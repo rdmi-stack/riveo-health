@@ -284,7 +284,7 @@ export default function OnboardingPage() {
             </p>
             <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto mb-8">
               <div className="p-3 rounded-xl bg-white/5">
-                <p className="text-2xl font-bold text-primary-light">< 7</p>
+                <p className="text-2xl font-bold text-primary-light">{"< 7"}</p>
                 <p className="text-xs text-slate-500">days to go live</p>
               </div>
               <div className="p-3 rounded-xl bg-white/5">

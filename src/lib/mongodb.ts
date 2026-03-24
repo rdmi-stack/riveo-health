@@ -4,12 +4,11 @@
 
 import { MongoClient, Db } from "mongodb";
 
-const uri = process.env.MONGODB_URI!;
+const uri = process.env.MONGODB_URI || "";
 const dbName = process.env.MONGODB_DB_NAME || "riveohealth";
 
-if (!uri) {
-  throw new Error("MONGODB_URI is not defined in environment variables");
-}
+// Don't throw at module load time — this breaks static page generation during build
+// The error will surface when getDb() is actually called at runtime
 
 const options = {
   maxPoolSize: 10,
@@ -17,24 +16,27 @@ const options = {
   socketTimeoutMS: 45000,
 };
 
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
-
 // Use global variable in dev to preserve connection across hot reloads
 const globalWithMongo = global as typeof globalThis & {
   _mongoClientPromise?: Promise<MongoClient>;
 };
 
-if (process.env.NODE_ENV === "development") {
-  if (!globalWithMongo._mongoClientPromise) {
-    client = new MongoClient(uri, options);
-    globalWithMongo._mongoClientPromise = client.connect();
+function getClientPromise(): Promise<MongoClient> {
+  if (!uri) {
+    return Promise.reject(new Error("MONGODB_URI is not defined"));
   }
-  clientPromise = globalWithMongo._mongoClientPromise;
-} else {
-  client = new MongoClient(uri, options);
-  clientPromise = client.connect();
+  if (process.env.NODE_ENV === "development") {
+    if (!globalWithMongo._mongoClientPromise) {
+      const client = new MongoClient(uri, options);
+      globalWithMongo._mongoClientPromise = client.connect();
+    }
+    return globalWithMongo._mongoClientPromise;
+  }
+  const client = new MongoClient(uri, options);
+  return client.connect();
 }
+
+const clientPromise = uri ? getClientPromise() : Promise.reject(new Error("MONGODB_URI not set"));
 
 export default clientPromise;
 

@@ -6,11 +6,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCollection, Collections } from "@/lib/mongodb";
 import { verifyPassword, createToken, setAuthCookie } from "@/lib/auth";
 import { logLogin } from "@/lib/audit-logger";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const { email, password } = body;
+
+    // Rate limit: 10 attempts per email per 15 minutes
+    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    const rl = rateLimit(`login:${email || ip}`, 10, 15 * 60 * 1000);
+    if (!rl.allowed) {
+      return NextResponse.json({ error: "Too many login attempts. Please try again in 15 minutes." }, { status: 429 });
+    }
 
     if (!email || !password) {
       return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
