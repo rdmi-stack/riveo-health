@@ -204,15 +204,15 @@ export default function VoiceDemoPage() {
 
     recognition.onerror = (e: any) => {
       if (silenceTimer) clearTimeout(silenceTimer);
-      if (e.error === "not-allowed" || e.error === "service-not-allowed") {
-        setMicError("Mic blocked. Click the lock icon in Chrome address bar → Site settings → Microphone → Allow. Then reload.");
+      // Only show error if we're not already successfully listening
+      if ((e.error === "not-allowed" || e.error === "service-not-allowed") && callState !== "listening") {
+        setMicError("Mic blocked. Allow microphone in browser settings and reload.");
       } else if (e.error === "no-speech" && shouldListenRef.current) {
         autoListen();
       } else if (e.error === "aborted") {
         // Normal when we stop it
-      } else {
-        console.log("Speech error:", e.error);
-        if (shouldListenRef.current) autoListen();
+      } else if (shouldListenRef.current) {
+        autoListen();
       }
     };
 
@@ -406,7 +406,7 @@ export default function VoiceDemoPage() {
               </div>
 
               {/* Mic error */}
-              {micError && (
+              {micError && callState !== "listening" && callState !== "ai_speaking" && callState !== "processing" && (
                 <div className="mt-4 px-4 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-[12px] text-rose-400 text-center max-w-md">
                   {micError}
                 </div>
