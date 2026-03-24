@@ -25,6 +25,10 @@ import {
   SearchCheck,
   UserCheck,
   ListChecks,
+  BookOpen,
+  Radar,
+  FileScan,
+  ShieldAlert,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -41,6 +45,10 @@ const NAV_ITEMS = [
   { href: "/dashboard/charge-capture", label: "Charge Capture", icon: SearchCheck },
   { href: "/dashboard/patient-billing", label: "Smart Billing", icon: UserCheck },
   { href: "/dashboard/pre-collection", label: "Pre-Collection", icon: ListChecks },
+  { href: "/dashboard/payer-rules", label: "Payer Rules", icon: BookOpen },
+  { href: "/dashboard/coverage-discovery", label: "Coverage Find", icon: Radar },
+  { href: "/dashboard/cdi", label: "CDI Review", icon: FileScan },
+  { href: "/dashboard/coding-audit", label: "Coding Audit", icon: ShieldAlert },
   { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/dashboard/import", label: "Import Data", icon: Upload },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
