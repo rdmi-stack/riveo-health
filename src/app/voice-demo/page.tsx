@@ -30,6 +30,7 @@ export default function VoiceDemoPage() {
   const [history, setHistory] = useState<{ role: string; text: string }[]>([]);
   const [callDuration, setCallDuration] = useState(0);
   const [textInput, setTextInput] = useState("");
+  const [showMicHelp, setShowMicHelp] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
@@ -48,7 +49,7 @@ export default function VoiceDemoPage() {
   async function startCall() {
     setCallActive(true); setCallState("connecting"); setHistory([]); setCallDuration(0); shouldListenRef.current = true;
     callTimerRef.current = setInterval(() => setCallDuration(d => d + 1), 1000);
-    try { streamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch { setCallState("idle"); setCallActive(false); alert("Microphone access required."); return; }
+    try { streamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true }); } catch { setCallState("idle"); setCallActive(false); setShowMicHelp(true); return; }
     setTimeout(() => { const g = { role: "ai", text: GREETING }; setHistory([g]); historyRef.current = [g]; aiSpeak(GREETING); }, 500);
   }
 
@@ -166,6 +167,42 @@ export default function VoiceDemoPage() {
 
       <div className="border-t border-white/[0.06] bg-white/[0.02]"><div className="max-w-4xl mx-auto px-4 py-16 text-center"><h2 className="text-[28px] font-bold text-white mb-3">Ready to elevate your patient billing?</h2><p className="text-slate-400 mb-8 max-w-xl mx-auto">See how practices cut overhead and boost patient satisfaction with 24/7 AI voice support.</p><Link href="/demo" className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 shadow-lg shadow-indigo-500/20">Book a demo <ArrowRight className="w-5 h-5"/></Link></div></div>
       <div className="border-t border-white/[0.06] py-5"><div className="max-w-6xl mx-auto px-4 flex items-center justify-between text-[11px] text-slate-600"><p>&copy; 2026 Riveo Health, Inc.</p><div className="flex gap-4"><Link href="/terms" className="hover:text-slate-400">Terms</Link><Link href="/privacy" className="hover:text-slate-400">Privacy</Link><Link href="/security" className="hover:text-slate-400">Security</Link></div></div></div>
+
+      {/* Mic Permission Modal */}
+      {showMicHelp && (
+        <>
+          <div className="fixed inset-0 bg-black/60 z-50" onClick={() => setShowMicHelp(false)} />
+          <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 text-center">
+              <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mx-auto mb-4">
+                <Mic className="w-8 h-8 text-indigo-600" />
+              </div>
+              <h3 className="text-[20px] font-bold text-gray-900 mb-2">Microphone Access Needed</h3>
+              <p className="text-[14px] text-gray-500 mb-6">To talk with the AI agent, we need access to your microphone. Please allow it in your browser.</p>
+
+              <div className="text-left bg-gray-50 rounded-xl p-4 mb-6 text-[13px] text-gray-600 space-y-2">
+                <p className="font-semibold text-gray-900">How to enable:</p>
+                <p>1. Click the <strong>lock icon</strong> 🔒 in the address bar</p>
+                <p>2. Find <strong>Microphone</strong> → set to <strong>Allow</strong></p>
+                <p>3. <strong>Reload</strong> the page</p>
+              </div>
+
+              <p className="text-[12px] text-gray-400 mb-4">Or you can type your questions using the text input below the call button.</p>
+
+              <div className="flex gap-3">
+                <button onClick={() => { setShowMicHelp(false); window.location.reload(); }}
+                  className="flex-1 py-3 rounded-xl bg-indigo-600 text-white font-semibold text-[14px] hover:bg-indigo-700">
+                  I&apos;ve Allowed It — Reload
+                </button>
+                <button onClick={() => setShowMicHelp(false)}
+                  className="px-6 py-3 rounded-xl border border-gray-200 text-gray-600 font-medium text-[14px] hover:bg-gray-50">
+                  Use Text Instead
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
