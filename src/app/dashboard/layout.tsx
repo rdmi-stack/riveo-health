@@ -8,7 +8,7 @@ import {
   Activity, LogOut, Bell, Search, Shield, Brain, ShieldCheck,
   MessageSquare, RefreshCw, Plug, CircleDollarSign, SearchCheck, UserCheck,
   ListChecks, BookOpen, Radar, FileScan, ShieldAlert, ChevronDown,
-  PanelLeftClose, PanelLeft, Sparkles, HelpCircle,
+  PanelLeftClose, PanelLeft, HelpCircle,
 } from "lucide-react";
 
 const NAV_GROUPS = [
@@ -37,6 +37,7 @@ const NAV_GROUPS = [
     { href: "/dashboard/pre-collection", label: "Pre-Collection", icon: ListChecks },
   ]},
   { label: "System", items: [
+    { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
     { href: "/dashboard/analytics", label: "Analytics", icon: BarChart3 },
     { href: "/dashboard/ehr-connect", label: "EHR Connect", icon: Plug },
     { href: "/dashboard/import", label: "Import Data", icon: Upload },
@@ -161,15 +162,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <kbd className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-gray-200 bg-gray-50 text-[10px] text-gray-400">⌘K</kbd>
           </div>
           <div className="flex items-center gap-2">
-            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-indigo-50 border border-indigo-100">
-              <Sparkles className="w-3 h-3 text-indigo-500" />
-              <span className="text-[10px] font-semibold text-indigo-600">GPT-5.4</span>
-            </div>
             <Link href="/audit" className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-all">Run Audit</Link>
-            <button className="relative p-2 rounded-lg hover:bg-gray-50 transition-colors">
+            <Link href="/dashboard/notifications" className="relative p-2 rounded-lg hover:bg-gray-50 transition-colors">
               <Bell className="w-[17px] h-[17px] text-gray-400" />
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-rose-500" />
-            </button>
+            </Link>
             <button className="p-2 rounded-lg hover:bg-gray-50 transition-colors"><HelpCircle className="w-[17px] h-[17px] text-gray-400" /></button>
           </div>
         </header>

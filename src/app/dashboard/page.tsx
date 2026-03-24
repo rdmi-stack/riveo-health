@@ -203,7 +203,7 @@ export default function DashboardHome() {
       )}
 
       <div className="mt-6 flex items-center justify-center gap-2 text-[11px] text-gray-300">
-        <Brain className="w-3.5 h-3.5" /> Powered by GPT-5.4 · HIPAA + DPDP compliant
+        <Brain className="w-3.5 h-3.5" /> AI-Powered · HIPAA + DPDP Compliant
       </div>
     </div>
   );
