@@ -1,61 +1,119 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import {
-  Activity, Mic, MicOff, Send, Phone, PhoneOff,
-  MessageSquare, Bot, User, Loader2, ArrowRight,
-  Shield, Clock, CheckCircle, DollarSign, CreditCard,
-  FileText, HelpCircle, ChevronRight,
+  Activity, Mic, MicOff, Phone, Bot, User, Loader2, ArrowRight,
+  Shield, Clock, CheckCircle, CreditCard, MessageSquare,
+  FileText, ChevronRight, ChevronDown, Volume2,
 } from "lucide-react";
 
-/* ── Sample patient bill (Emily Johnson) ────────────── */
+/* ── Patient bill data ──────────────────────────────── */
 const PATIENT = {
   name: "Emily Johnson",
   id: "PAT-29381",
   bills: [
-    { date: "Feb 15, 2026", provider: "Dr. Sarah Chen", service: "Office Visit (Level 4)", cpt: "99214", total: 320, insurance: 250, youOwe: 70 },
-    { date: "Feb 15, 2026", provider: "Quest Diagnostics", service: "Comprehensive Metabolic Panel", cpt: "80053", total: 180, insurance: 140, youOwe: 40 },
-    { date: "Jan 28, 2026", provider: "RadNet Imaging", service: "MRI Knee — Right", cpt: "73721", total: 1850, insurance: 1400, youOwe: 450 },
+    { date: "Aug 29, 2026", provider: "Dr. Maria Rodriguez", location: "ABC Medical", service: "Preventive visit, established patient", cpt: "99396", billed: 180, adjustment: -30, insurancePaid: 120, copay: 30, youOwe: 0 },
+    { date: "Aug 29, 2026", provider: "Dr. Maria Rodriguez", location: "ABC Medical", service: "Office Visit (Level 3)", cpt: "99213", billed: 75, adjustment: -15, insurancePaid: 40, copay: 0, youOwe: 20 },
   ],
-  totalBalance: 560,
-  insurancePaid: 1790,
-  copayPaidAtVisit: 35,
+  insurance: "Aetna Commercial",
+  totalBilled: 255, totalAdjustment: -45, totalInsurancePaid: 160, alreadyPaid: 30, totalOutstanding: 20,
 };
 
-const SUGGESTED_QUESTIONS = [
+const SUGGESTED = [
   "I was surprised to get this bill... why am I receiving it?",
   "What visits are included in my total balance?",
   "What kind of payment options do I have?",
   "I thought I already paid something at the visit...",
   "I thought my insurance would cover this...",
-  "Can I set up a payment plan?",
-  "Why is the MRI so expensive?",
 ];
 
-function fmt$(n: number) { return `$${n.toLocaleString()}`; }
+function fmt$(n: number) { return `$${Math.abs(n).toFixed(2)}`; }
 
 export default function VoiceDemoPage() {
-  const [messages, setMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([
-    { role: "assistant", content: `Hi Emily! I'm your billing assistant at Riveo Health. I can see your account has a balance of ${fmt$(PATIENT.totalBalance)} across ${PATIENT.bills.length} services. How can I help you today?` },
+  const [transcript, setTranscript] = useState("");
+  const [listening, setListening] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [speaking, setSpeaking] = useState(false);
+  const [history, setHistory] = useState<{ role: string; text: string }[]>([
+    { role: "ai", text: `Hi Emily! I'm your billing assistant. I can see your account has an outstanding balance of ${fmt$(PATIENT.totalOutstanding)}. How can I help you today?` },
   ]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showBill, setShowBill] = useState(false);
+  const [showBill, setShowBill] = useState(true);
+  const recognitionRef = useRef<any>(null);
+  const synthRef = useRef<SpeechSynthesis | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    synthRef.current = window.speechSynthesis;
+    // Speak the greeting
+    speak(history[0].text);
+  }, []);
+
+  useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages]);
+  }, [history]);
 
-  async function sendMessage(text?: string) {
-    const msg = text || input.trim();
-    if (!msg || loading) return;
+  /* ── Text-to-Speech ───────────────────────────────── */
+  function speak(text: string) {
+    if (!synthRef.current) return;
+    synthRef.current.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.05;
+    utterance.pitch = 1.1;
+    // Try to find a female voice
+    const voices = synthRef.current.getVoices();
+    const preferred = voices.find(v => v.name.includes("Samantha") || v.name.includes("Karen") || v.name.includes("Female") || (v.lang === "en-US" && v.name.includes("Google")));
+    if (preferred) utterance.voice = preferred;
+    utterance.onstart = () => setSpeaking(true);
+    utterance.onend = () => setSpeaking(false);
+    synthRef.current.speak(utterance);
+  }
 
-    const userMsg = { role: "user" as const, content: msg };
-    setMessages(prev => [...prev, userMsg]);
-    setInput("");
-    setLoading(true);
+  /* ── Speech-to-Text ───────────────────────────────── */
+  function startListening() {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert("Speech recognition is not supported in your browser. Please use Chrome.");
+      return;
+    }
+
+    // Stop any ongoing speech
+    synthRef.current?.cancel();
+    setSpeaking(false);
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
+
+    recognition.onstart = () => { setListening(true); setTranscript(""); };
+    recognition.onresult = (e: any) => {
+      let t = "";
+      for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+      setTranscript(t);
+    };
+    recognition.onend = () => {
+      setListening(false);
+      // Auto-send if we got a transcript
+      if (transcript.trim()) handleSend(transcript.trim());
+    };
+    recognition.onerror = () => setListening(false);
+
+    recognitionRef.current = recognition;
+    recognition.start();
+  }
+
+  function stopListening() {
+    recognitionRef.current?.stop();
+    setListening(false);
+  }
+
+  /* ── Send to AI ───────────────────────────────────── */
+  const handleSend = useCallback(async (text: string) => {
+    if (!text || processing) return;
+    setHistory(prev => [...prev, { role: "user", text }]);
+    setTranscript("");
+    setProcessing(true);
 
     try {
       const res = await fetch("/api/voice-agent", {
@@ -63,202 +121,223 @@ export default function VoiceDemoPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "handle_call",
-          callerMessage: msg,
+          callerMessage: text,
           patientId: PATIENT.id,
-          callHistory: messages.map(m => ({ role: m.role, content: m.content })),
+          callHistory: history.map(h => ({ role: h.role === "ai" ? "assistant" : "user", content: h.text })),
         }),
       });
       const data = await res.json();
-      if (data.response) {
-        setMessages(prev => [...prev, { role: "assistant", content: data.response }]);
-      }
+      const reply = data.response || "I'm sorry, let me transfer you to our billing team.";
+      setHistory(prev => [...prev, { role: "ai", text: reply }]);
+      speak(reply);
     } catch {
-      setMessages(prev => [...prev, { role: "assistant", content: "I'm sorry, I'm having trouble right now. Let me transfer you to our billing team. Please hold." }]);
+      const fallback = "I'm having a little trouble. Let me connect you with a team member.";
+      setHistory(prev => [...prev, { role: "ai", text: fallback }]);
+      speak(fallback);
     } finally {
-      setLoading(false);
+      setProcessing(false);
     }
+  }, [history, processing]);
+
+  // Handle transcript on listening end
+  useEffect(() => {
+    if (!listening && transcript.trim() && !processing) {
+      handleSend(transcript.trim());
+    }
+  }, [listening]);
+
+  function handleSuggested(text: string) {
+    handleSend(text);
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-indigo-950 to-slate-950">
-      {/* Top bar */}
-      <div className="border-b border-white/10">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+    <div className="min-h-screen bg-[#0a0e1a]">
+      {/* Top announcement */}
+      <div className="bg-indigo-600">
+        <div className="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
+              <Activity className="w-4 h-4 text-white" />
+            </div>
+            <p className="text-[13px] text-white">For healthcare leaders: talk with our AI voice agent for patient billing — live, right now →</p>
+          </div>
+          <Link href="/demo" className="px-4 py-1.5 rounded-lg bg-white text-indigo-600 text-[12px] font-semibold hover:bg-indigo-50 transition-colors">
+            Talk to Agent now
+          </Link>
+        </div>
+      </div>
+
+      {/* Nav */}
+      <nav className="border-b border-white/[0.06]">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-cyan-400 flex items-center justify-center">
               <Activity className="w-[18px] h-[18px] text-white" />
             </div>
-            <span className="text-[14px] font-bold text-white">Riveo <span className="text-indigo-400">Health</span></span>
+            <span className="text-[16px] font-bold text-white">Riveo <span className="text-indigo-400">Health</span></span>
           </Link>
+          <div className="hidden md:flex items-center gap-8 text-[13px] text-slate-400">
+            <Link href="/platform" className="hover:text-white transition-colors">AI Voice Agent</Link>
+            <Link href="/solutions" className="hover:text-white transition-colors">Solutions</Link>
+            <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
+          </div>
           <div className="flex items-center gap-3">
-            <Link href="/demo" className="px-4 py-2 text-[12px] font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors">
-              Request a Demo
-            </Link>
+            <Link href="/login" className="px-4 py-2 text-[13px] text-white border border-white/20 rounded-lg hover:bg-white/5 transition-colors">Login</Link>
+            <Link href="/demo" className="px-4 py-2 text-[13px] text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors font-medium">Request a Demo</Link>
           </div>
         </div>
-      </div>
-
-      {/* Announcement bar */}
-      <div className="bg-indigo-600/20 border-b border-indigo-500/20">
-        <div className="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-center gap-2 text-[12px] text-indigo-300">
-          <Phone className="w-3.5 h-3.5" />
-          For healthcare leaders: talk with our AI voice agent for patient billing — live, right now
-          <ChevronRight className="w-3 h-3" />
-        </div>
-      </div>
-
-      {/* Hero */}
-      <div className="max-w-6xl mx-auto px-4 pt-16 pb-8 text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-[12px] text-slate-400 mb-6">
-          <Bot className="w-4 h-4 text-indigo-400" /> AI Voice Agent — Live Demo
-        </div>
-        <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
-          Try <span className="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Voice AI Agent</span><br />for Patient Billing
-        </h1>
-        <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-          You&apos;re Emily Johnson, a patient who just received her medical bill.
-          Ask about your charges, payment options, or insurance details.
-        </p>
-      </div>
+      </nav>
 
       {/* Main content */}
-      <div className="max-w-6xl mx-auto px-4 pb-16">
-        <div className="grid lg:grid-cols-5 gap-6">
-          {/* Suggested questions */}
-          <div className="lg:col-span-1 order-2 lg:order-1">
-            <p className="text-[11px] text-slate-500 uppercase tracking-wider font-semibold mb-3">Try asking</p>
-            <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
-              {SUGGESTED_QUESTIONS.map((q, i) => (
-                <button key={i} onClick={() => sendMessage(q)} disabled={loading}
-                  className="shrink-0 text-left px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-[12px] text-slate-300 hover:bg-white/10 hover:border-white/20 transition-all disabled:opacity-50">
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="grid lg:grid-cols-2 gap-12 pt-20 pb-16">
+          {/* Left — Hero + Voice button */}
+          <div>
+            <h1 className="text-[46px] font-bold text-white leading-[1.1] mb-6">
+              Try{" "}
+              <span className="relative inline-block">
+                <span className="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Voice AI Agent</span>
+              </span>
+              <br />for Patient Billing
+            </h1>
+            <p className="text-[16px] text-slate-400 mb-10 leading-relaxed max-w-lg">
+              You&apos;re Emily Johnson, a patient who just received her medical bill.
+              Ask about your charges, payment options, or insurance details —{" "}
+              <strong className="text-white">just press the button and talk.</strong>
+            </p>
+
+            {/* Suggested questions floating */}
+            <div className="flex flex-wrap gap-2 mb-10">
+              {SUGGESTED.map((q, i) => (
+                <button key={i} onClick={() => handleSuggested(q)} disabled={processing || listening}
+                  className="px-3 py-2 rounded-xl bg-white/[0.05] border border-white/10 text-[12px] text-slate-400 hover:bg-white/10 hover:text-white transition-all disabled:opacity-40">
                   {q}
                 </button>
               ))}
             </div>
-          </div>
 
-          {/* Chat area */}
-          <div className="lg:col-span-3 order-1 lg:order-2">
-            <div className="rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden backdrop-blur-sm">
-              {/* Chat header */}
-              <div className="flex items-center justify-between px-5 py-3 border-b border-white/10 bg-white/[0.02]">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-cyan-400 flex items-center justify-center">
-                    <Bot className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-semibold text-white">Riveo AI Agent</p>
-                    <p className="text-[10px] text-emerald-400 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> Active now
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
-                  <Shield className="w-3 h-3 text-emerald-500" /> HIPAA Compliant
-                </div>
-              </div>
-
-              {/* Messages */}
-              <div ref={scrollRef} className="h-[420px] overflow-y-auto p-5 space-y-4">
-                {messages.map((msg, i) => (
-                  <div key={i} className={`flex gap-2.5 ${msg.role === "user" ? "justify-end" : ""}`}>
-                    {msg.role === "assistant" && (
-                      <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 border border-indigo-500/30 flex items-center justify-center shrink-0 mt-0.5">
-                        <Bot className="w-3.5 h-3.5 text-indigo-400" />
-                      </div>
-                    )}
-                    <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-[13px] leading-relaxed ${
-                      msg.role === "user"
-                        ? "bg-indigo-600 text-white rounded-br-md"
-                        : "bg-white/[0.06] text-slate-200 border border-white/[0.06] rounded-bl-md"
-                    }`}>
-                      {msg.content}
-                    </div>
-                    {msg.role === "user" && (
-                      <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center shrink-0 mt-0.5">
-                        <User className="w-3.5 h-3.5 text-slate-300" />
-                      </div>
-                    )}
-                  </div>
-                ))}
-                {loading && (
-                  <div className="flex gap-2.5">
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 border border-indigo-500/30 flex items-center justify-center shrink-0">
-                      <Bot className="w-3.5 h-3.5 text-indigo-400" />
-                    </div>
-                    <div className="px-4 py-3 rounded-2xl bg-white/[0.06] border border-white/[0.06] rounded-bl-md">
-                      <div className="flex gap-1">
-                        <span className="w-2 h-2 rounded-full bg-indigo-400/50 animate-bounce" style={{ animationDelay: "0ms" }} />
-                        <span className="w-2 h-2 rounded-full bg-indigo-400/50 animate-bounce" style={{ animationDelay: "150ms" }} />
-                        <span className="w-2 h-2 rounded-full bg-indigo-400/50 animate-bounce" style={{ animationDelay: "300ms" }} />
-                      </div>
-                    </div>
-                  </div>
+            {/* Voice button */}
+            <div className="flex flex-col items-center">
+              <button
+                onClick={listening ? stopListening : startListening}
+                disabled={processing}
+                className={`relative w-48 h-16 rounded-2xl font-semibold text-[16px] flex items-center justify-center gap-3 transition-all shadow-2xl ${
+                  listening
+                    ? "bg-rose-500 text-white shadow-rose-500/30 scale-105"
+                    : processing
+                      ? "bg-slate-700 text-slate-400"
+                      : "bg-amber-400 text-slate-900 hover:bg-amber-300 shadow-amber-400/20 hover:shadow-amber-400/40 hover:scale-[1.02]"
+                }`}
+              >
+                {processing ? (
+                  <><Loader2 className="w-5 h-5 animate-spin" /> Processing...</>
+                ) : listening ? (
+                  <><MicOff className="w-5 h-5" /> Stop</>
+                ) : speaking ? (
+                  <><Volume2 className="w-5 h-5" /> Speaking...</>
+                ) : (
+                  <><span className="text-[15px]">Talk to Agent</span> <Mic className="w-5 h-5" /></>
                 )}
-              </div>
+                {/* Pulse ring when listening */}
+                {listening && (
+                  <>
+                    <span className="absolute inset-0 rounded-2xl bg-rose-500 animate-ping opacity-20" />
+                    <span className="absolute inset-0 rounded-2xl bg-rose-500 animate-pulse opacity-10" />
+                  </>
+                )}
+              </button>
 
-              {/* Input */}
-              <div className="px-5 py-4 border-t border-white/10 bg-white/[0.02]">
-                <form onSubmit={e => { e.preventDefault(); sendMessage(); }} className="flex gap-2">
-                  <input value={input} onChange={e => setInput(e.target.value)}
-                    placeholder="Type your question as Emily..."
-                    className="flex-1 px-4 py-3 rounded-xl bg-white/[0.05] border border-white/10 text-[13px] text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20" />
-                  <button type="submit" disabled={loading || !input.trim()}
-                    className="px-4 py-3 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700 transition-colors disabled:opacity-40">
-                    <Send className="w-4 h-4" />
-                  </button>
-                </form>
-                <p className="text-[10px] text-slate-600 text-center mt-2">AI billing assistant · Not medical advice · HIPAA compliant</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Bill preview */}
-          <div className="lg:col-span-1 order-3">
-            <button onClick={() => setShowBill(!showBill)}
-              className="w-full text-left mb-3 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-[11px] text-slate-400 hover:bg-white/10 transition-all flex items-center justify-between">
-              <span className="flex items-center gap-1.5"><FileText className="w-3 h-3" /> Emily&apos;s Bill</span>
-              <ChevronRight className={`w-3 h-3 transition-transform ${showBill ? "rotate-90" : ""}`} />
-            </button>
-
-            {showBill && (
-              <div className="rounded-xl bg-white/[0.03] border border-white/10 p-4 space-y-3">
-                <div className="text-center pb-3 border-b border-white/10">
-                  <p className="text-[12px] font-semibold text-white">{PATIENT.name}</p>
-                  <p className="text-[10px] text-slate-500">{PATIENT.id}</p>
-                  <p className="text-[22px] font-bold text-white mt-2">{fmt$(PATIENT.totalBalance)}</p>
-                  <p className="text-[10px] text-slate-500">Total Balance Due</p>
+              {/* Live transcript */}
+              {(listening || transcript) && (
+                <div className="mt-4 px-4 py-2 rounded-xl bg-white/[0.05] border border-white/10 text-[13px] text-slate-300 min-h-[40px] max-w-md text-center">
+                  {listening && !transcript && <span className="text-slate-500 animate-pulse">Listening...</span>}
+                  {transcript && <span>{transcript}</span>}
                 </div>
-                {PATIENT.bills.map((bill, i) => (
-                  <div key={i} className="pb-2 border-b border-white/5 last:border-0 last:pb-0">
-                    <p className="text-[11px] text-white font-medium">{bill.service}</p>
-                    <p className="text-[10px] text-slate-500">{bill.date} · {bill.provider}</p>
-                    <div className="flex justify-between mt-1 text-[10px]">
-                      <span className="text-slate-500">Total: {fmt$(bill.total)}</span>
-                      <span className="text-emerald-400">Ins: {fmt$(bill.insurance)}</span>
-                      <span className="text-white font-semibold">{fmt$(bill.youOwe)}</span>
+              )}
+            </div>
+
+            {/* Conversation history */}
+            {history.length > 1 && (
+              <div ref={scrollRef} className="mt-8 max-h-48 overflow-y-auto space-y-3 pr-2">
+                {history.map((h, i) => (
+                  <div key={i} className={`flex gap-2 ${h.role === "user" ? "justify-end" : ""}`}>
+                    {h.role === "ai" && <div className="w-6 h-6 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center shrink-0 mt-0.5"><Bot className="w-3 h-3 text-indigo-400" /></div>}
+                    <div className={`max-w-[85%] px-3 py-2 rounded-xl text-[12px] ${h.role === "user" ? "bg-indigo-600 text-white rounded-br-sm" : "bg-white/[0.05] text-slate-300 border border-white/[0.06] rounded-bl-sm"}`}>
+                      {h.text}
                     </div>
+                    {h.role === "user" && <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center shrink-0 mt-0.5"><User className="w-3 h-3 text-slate-400" /></div>}
                   </div>
                 ))}
-                <div className="pt-2 flex justify-between text-[10px]">
-                  <span className="text-slate-500">Copay paid at visit</span>
-                  <span className="text-emerald-400">{fmt$(PATIENT.copayPaidAtVisit)}</span>
-                </div>
               </div>
             )}
+          </div>
 
-            <div className="mt-4 space-y-2">
-              <div className="flex items-center gap-2 text-[10px] text-slate-500">
-                <Clock className="w-3 h-3 text-indigo-400" /> 24/7 availability
-              </div>
-              <div className="flex items-center gap-2 text-[10px] text-slate-500">
-                <MessageSquare className="w-3 h-3 text-indigo-400" /> Voice, chat, SMS, email
-              </div>
-              <div className="flex items-center gap-2 text-[10px] text-slate-500">
-                <CreditCard className="w-3 h-3 text-indigo-400" /> Take payments in-call
-              </div>
-              <div className="flex items-center gap-2 text-[10px] text-slate-500">
-                <CheckCircle className="w-3 h-3 text-indigo-400" /> 70% calls resolved by AI
+          {/* Right — Phone mockup with bill */}
+          <div className="flex justify-center">
+            <div className="relative">
+              {/* Phone frame */}
+              <div className="w-[320px] rounded-[36px] bg-slate-900 border-[3px] border-slate-700 overflow-hidden shadow-2xl shadow-black/50">
+                {/* Status bar */}
+                <div className="flex items-center justify-between px-6 pt-3 pb-2 bg-slate-900">
+                  <span className="text-[12px] text-white font-medium">9:41</span>
+                  <div className="w-20 h-5 rounded-full bg-black" />
+                  <div className="flex items-center gap-1">
+                    <div className="flex gap-px">{[1,2,3,4].map(i => <div key={i} className={`w-[3px] rounded-sm bg-white ${i === 4 ? "h-2.5" : i === 3 ? "h-2" : i === 2 ? "h-1.5" : "h-1"}`} />)}</div>
+                    <span className="text-[10px] text-white ml-1">5G</span>
+                  </div>
+                </div>
+
+                {/* Bill content */}
+                <div className="bg-indigo-700 px-5 py-4">
+                  <p className="text-[14px] font-semibold text-white">Hi Emily, this is your bill</p>
+                </div>
+
+                <div className="bg-white px-5 py-4 h-[460px] overflow-y-auto">
+                  <p className="text-[11px] text-gray-500 mb-0.5">Scroll inside to view Emily&apos;s bill</p>
+
+                  {/* Recent visit */}
+                  <h3 className="text-[13px] font-bold text-gray-900 mt-3 mb-2">Recent visit</h3>
+                  <div className="space-y-1.5 text-[11px] mb-4">
+                    <div className="flex justify-between"><span className="text-gray-500">Date</span><span className="text-gray-900">{PATIENT.bills[0].date}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Provider</span><span className="text-gray-900">{PATIENT.bills[0].provider}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Location</span><span className="text-gray-900">{PATIENT.bills[0].location}</span></div>
+                  </div>
+
+                  <div className="h-px bg-gray-100 my-3" />
+
+                  <div className="flex justify-between text-[11px] mb-1"><span className="text-gray-500">Insurance</span><span className="text-gray-900">{PATIENT.insurance}</span></div>
+
+                  <div className="h-px bg-gray-100 my-3" />
+
+                  {/* Summary */}
+                  <div className="space-y-1.5 text-[11px]">
+                    <div className="flex justify-between"><span className="text-gray-500">Billed</span><span className="text-gray-900">{fmt$(PATIENT.totalBilled)}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Insurance adjustments</span><span className="text-emerald-600">-{fmt$(Math.abs(PATIENT.totalAdjustment))}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Insurance paid</span><span className="text-emerald-600">-{fmt$(PATIENT.totalInsurancePaid)}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Already paid by you</span><span className="text-emerald-600">-{fmt$(PATIENT.alreadyPaid)}</span></div>
+                    <div className="flex justify-between font-bold pt-1 border-t border-gray-100"><span className="text-gray-900">Total amount outstanding</span><span className="text-gray-900">{fmt$(PATIENT.totalOutstanding)}</span></div>
+                  </div>
+
+                  <div className="h-px bg-gray-100 my-4" />
+
+                  {/* Procedures */}
+                  <h3 className="text-[13px] font-bold text-gray-900 mb-1">Procedures</h3>
+                  <p className="text-[10px] text-gray-400 mb-3">Click the procedure to view the details</p>
+
+                  {PATIENT.bills.map((bill, i) => (
+                    <div key={i} className="mb-3 border border-gray-100 rounded-lg p-3">
+                      <p className="text-[11px] font-semibold text-gray-900">{bill.service}</p>
+                      <p className="text-[10px] text-gray-400">CPT/HCPCS Code: {bill.cpt}</p>
+                      <div className="mt-2 space-y-1 text-[10px]">
+                        <div className="flex justify-between"><span className="text-gray-500">Total billed</span><span className="text-gray-900">{fmt$(bill.billed)}</span></div>
+                        <div className="flex justify-between"><span className="text-gray-500">Insurance adjustment</span><span className="text-emerald-600">-{fmt$(Math.abs(bill.adjustment))}</span></div>
+                        <div className="flex justify-between"><span className="text-gray-500">Insurance paid</span><span className="text-emerald-600">-{fmt$(bill.insurancePaid)}</span></div>
+                        {bill.copay > 0 && <div className="flex justify-between"><span className="text-gray-500">Already paid by you (copay)</span><span className="text-emerald-600">-{fmt$(bill.copay)}</span></div>}
+                        <div className="flex justify-between font-semibold pt-1 border-t border-gray-50"><span className="text-gray-700">Amount you owe</span><span className="text-gray-900">{fmt$(bill.youOwe)}</span></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -266,29 +345,28 @@ export default function VoiceDemoPage() {
       </div>
 
       {/* CTA */}
-      <div className="border-t border-white/10 bg-white/[0.02]">
-        <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-          <h2 className="text-3xl font-bold text-white mb-3">Ready to elevate your patient billing?</h2>
-          <p className="text-slate-400 mb-8 max-w-xl mx-auto">
-            Get a tailored demo of Riveo AI. See how practices cut overhead, speed up collections,
+      <div className="border-t border-white/[0.06] bg-white/[0.02]">
+        <div className="max-w-4xl mx-auto px-4 py-20 text-center">
+          <h2 className="text-[32px] font-bold text-white mb-3">Ready to elevate your patient billing?</h2>
+          <p className="text-slate-400 mb-8 max-w-xl mx-auto text-[15px]">
+            Get a tailored demo of our AI agent. See how practices cut overhead, speed up collections,
             and boost patient satisfaction with 24/7 AI support.
           </p>
           <Link href="/demo"
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-indigo-600 text-white font-semibold text-[15px] hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-500/20">
-            Book a Demo <ArrowRight className="w-5 h-5" />
+            Book a demo <ArrowRight className="w-5 h-5" />
           </Link>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="border-t border-white/10 py-6">
+      <div className="border-t border-white/[0.06] py-6">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between text-[11px] text-slate-600">
-          <p>&copy; 2026 Riveo Health. All Rights Reserved.</p>
-          <div className="flex items-center gap-4">
-            <Link href="/privacy" className="hover:text-slate-400">Privacy</Link>
-            <Link href="/terms" className="hover:text-slate-400">Terms</Link>
+          <p>&copy; 2026 Riveo Health, Inc. All Rights Reserved.</p>
+          <div className="flex gap-4">
+            <Link href="/terms" className="hover:text-slate-400">Terms of Service</Link>
+            <Link href="/privacy" className="hover:text-slate-400">Privacy Policy</Link>
             <Link href="/security" className="hover:text-slate-400">Security</Link>
-            <Link href="/hipaa" className="hover:text-slate-400">HIPAA</Link>
           </div>
         </div>
       </div>
