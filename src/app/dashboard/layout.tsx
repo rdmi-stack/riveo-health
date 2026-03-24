@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -72,6 +72,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [collapsed, setCollapsed] = useState(false);
   const [expandedGroup, setExpandedGroup] = useState<string | null>(null);
   const [notifOpen, setNotifOpen] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  // ⌘K / Ctrl+K shortcut to focus search
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+      if (e.key === "Escape") {
+        searchRef.current?.blur();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   useSessionTimeout();
@@ -194,7 +210,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <header className="h-[56px] flex items-center justify-between px-6 border-b border-gray-200 bg-white shrink-0">
           <div className="flex items-center gap-2.5 w-full max-w-md">
             <Search className="w-4 h-4 text-gray-300" />
-            <input type="text" placeholder="Search claims, patients, denials..."
+            <input ref={searchRef} type="text" placeholder="Search claims, patients, denials..."
               className="w-full bg-transparent text-[13px] text-gray-900 placeholder:text-gray-300 focus:outline-none" />
             <kbd className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-gray-200 bg-gray-50 text-[10px] text-gray-400">⌘K</kbd>
           </div>
