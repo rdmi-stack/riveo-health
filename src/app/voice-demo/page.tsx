@@ -46,11 +46,14 @@ export default function VoiceDemoPage() {
   useEffect(() => { historyRef.current = history; }, [history]);
   useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }); }, [history]);
 
-  // Request mic permission on page load
+  // Check mic permission on page load — only show modal if truly denied
   useEffect(() => {
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(stream => { stream.getTracks().forEach(t => t.stop()); }) // Got permission, release immediately
-      .catch(() => { setShowMicHelp(true); }); // Show help modal
+    if (navigator.permissions) {
+      navigator.permissions.query({ name: "microphone" as PermissionName }).then(result => {
+        if (result.state === "denied") setShowMicHelp(true);
+        // "prompt" or "granted" = don't show modal, browser will handle it
+      }).catch(() => {}); // permissions API not supported, skip
+    }
   }, []);
 
   async function startCall() {
