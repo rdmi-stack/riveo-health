@@ -148,18 +148,10 @@ export default function VoiceDemoPage() {
   /* ═══════════════════════════════════════════════════
      MIC — Speech-to-Text
      ═══════════════════════════════════════════════════ */
-  async function startListening() {
+  function startListening() {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) {
       setMicError("Speech recognition not supported. Use Chrome.");
-      return;
-    }
-
-    // Request mic permission explicitly
-    try {
-      await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch (err) {
-      setMicError("Microphone access denied. Please allow mic access and try again.");
       return;
     }
 
@@ -210,7 +202,7 @@ export default function VoiceDemoPage() {
     recognition.onerror = (e: any) => {
       if (silenceTimer) clearTimeout(silenceTimer);
       if (e.error === "not-allowed" || e.error === "service-not-allowed") {
-        setMicError("Microphone blocked. Check browser permissions.");
+        setMicError("Mic blocked. Click the lock icon in Chrome address bar → Site settings → Microphone → Allow. Then reload.");
       } else if (e.error === "no-speech" && shouldListenRef.current) {
         autoListen();
       } else if (e.error === "aborted") {
