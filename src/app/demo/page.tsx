@@ -103,7 +103,7 @@ export default function DemoPage() {
     setSubmitting(true);
     setError("");
     try {
-      const res = await fetch("/api/demo", {
+      const res = await fetch(`https://riveo-health-api-production.up.railway.app/api/demo`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -4,6 +4,8 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Activity, Mic, PhoneOff, Bot, User, Loader2, ArrowRight, Shield, Volume2, Phone } from "lucide-react";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://riveo-health-api-production.up.railway.app";
+
 const PATIENT = {
   name: "Emily Johnson", id: "PAT-29381",
   bills: [
@@ -89,7 +91,7 @@ export default function VoiceDemoPage() {
 
     try {
       // Try Resemble AI
-      const res = await fetch("/api/voice", {
+      const res = await fetch(`${API_BASE}/api/voice`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
@@ -244,7 +246,7 @@ export default function VoiceDemoPage() {
     setHistory(prev => [...prev, { role: "user", text }]);
 
     try {
-      const res = await fetch("/api/voice-agent", {
+      const res = await fetch(`${API_BASE}/api/voice-agent`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

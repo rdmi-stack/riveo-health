@@ -479,6 +479,52 @@ app.post("/api/chat", async (req, res) => {
   } catch (e) { res.status(500).json({ error: "Chat failed" }); }
 });
 
+// ── Patient Portal ─────────────────────────────────────
+app.get("/api/patient-portal", async (req, res) => {
+  try {
+    const { patientId = "PAT-DEMO", org = "demo" } = req.query;
+    const bills = await col("patient_bills").find({ orgId: org, patientId }).sort({ createdAt: -1 }).limit(20).toArray();
+    const payments = await col("patient_payments").find({ orgId: org, patientId }).sort({ createdAt: -1 }).limit(10).toArray();
+    const totalBalance = bills.reduce((s, b) => s + (b.balance || 0), 0);
+    const totalPaid = payments.reduce((s, p) => s + (p.amount || 0), 0);
+    res.json({ patientId, totalBalance, totalPaid, billCount: bills.length, bills, payments });
+  } catch (e) { res.status(500).json({ error: "Failed" }); }
+});
+
+app.post("/api/patient-portal", async (req, res) => {
+  try {
+    const { action, patientId = "PAT-DEMO", orgId = "demo" } = req.body;
+    if (action === "pay") {
+      const { billId, amount, method = "card" } = req.body;
+      await col("patient_payments").insertOne({ orgId, patientId, billId, amount, method, status: "completed", confirmationNumber: `PAY-${Date.now().toString(36).toUpperCase()}`, createdAt: new Date() });
+      return res.json({ success: true, message: "Payment processed" });
+    }
+    if (action === "message") {
+      await col("patient_messages").insertOne({ orgId, patientId, from: "patient", message: req.body.message, createdAt: new Date() });
+      return res.json({ success: true, message: "Message sent" });
+    }
+    if (action === "seed_demo") {
+      const bills = [
+        { orgId, patientId, description: "Office Visit — Dr. Sarah Chen", dateOfService: "2026-02-15", totalCharge: 320, insurancePaid: 250, balance: 70, status: "due", createdAt: new Date() },
+        { orgId, patientId, description: "MRI Knee — Right", dateOfService: "2026-01-28", totalCharge: 1850, insurancePaid: 1400, balance: 450, status: "due", createdAt: new Date() },
+        { orgId, patientId, description: "Lab Work", dateOfService: "2026-03-01", totalCharge: 180, insurancePaid: 140, balance: 40, status: "due", createdAt: new Date() },
+      ];
+      await col("patient_bills").deleteMany({ orgId, patientId });
+      await col("patient_bills").insertMany(bills);
+      return res.json({ success: true, bills: bills.length });
+    }
+    res.status(400).json({ error: "Invalid action" });
+  } catch (e) { res.status(500).json({ error: "Failed" }); }
+});
+
+// ── Statements ─────────────────────────────────────────
+app.get("/api/statements", async (req, res) => {
+  try {
+    const items = await col("digital_statements").find({ orgId: req.query.org || "demo" }).sort({ createdAt: -1 }).limit(50).toArray();
+    res.json({ statements: items, stats: { totalSent: items.length, totalOpened: items.filter(i => i.openedAt).length, totalPaid: items.filter(i => i.paidAt).length } });
+  } catch (e) { res.status(500).json({ error: "Failed" }); }
+});
+
 // ── Catch-all for unimplemented routes ─────────────────
 app.use("/api", (req, res) => {
   res.status(404).json({ error: "Endpoint not found" });

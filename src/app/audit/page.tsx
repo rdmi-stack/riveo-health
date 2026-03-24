@@ -130,7 +130,7 @@ export default function AuditPage() {
     e.preventDefault();
     // Save lead to backend
     try {
-      await fetch("/api/audit", {
+      await fetch(`https://riveo-health-api-production.up.railway.app/api/audit`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

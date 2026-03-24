@@ -36,7 +36,7 @@ export default function ChatWidget({ orgId = "demo" }: { orgId?: string }) {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/chat", {
+      const res = await fetch(`https://riveo-health-api-production.up.railway.app/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

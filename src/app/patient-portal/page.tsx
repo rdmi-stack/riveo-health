@@ -26,7 +26,7 @@ export default function PatientPortalPage() {
 
   async function fetchData() {
     setLoading(true);
-    const res = await fetch("/api/patient-portal?patientId=PAT-DEMO&org=demo");
+    const res = await fetch(`https://riveo-health-api-production.up.railway.app/api/patient-portal?patientId=PAT-DEMO&org=demo`);
     setData(await res.json());
     setLoading(false);
   }
@@ -35,14 +35,14 @@ export default function PatientPortalPage() {
 
   async function seedDemo() {
     setSeeding(true);
-    await fetch("/api/patient-portal", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "seed_demo" }) });
+    await fetch(`https://riveo-health-api-production.up.railway.app/api/patient-portal`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "seed_demo" }) });
     await fetchData();
     setSeeding(false);
   }
 
   async function makePayment(billId: string, amount: number) {
     setPaying(billId);
-    await fetch("/api/patient-portal", { method: "POST", headers: { "Content-Type": "application/json" },
+    await fetch(`https://riveo-health-api-production.up.railway.app/api/patient-portal`, { method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "pay", billId, amount, patientId: "PAT-DEMO" }) });
     await fetchData();
     setPaying(null);
@@ -50,7 +50,7 @@ export default function PatientPortalPage() {
 
   async function setupPlan(billId: string) {
     const monthly = Math.ceil(planModal.balance / planMonths);
-    await fetch("/api/patient-portal", { method: "POST", headers: { "Content-Type": "application/json" },
+    await fetch(`https://riveo-health-api-production.up.railway.app/api/patient-portal`, { method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "setup_plan", billId, months: planMonths, monthlyAmount: monthly, patientId: "PAT-DEMO" }) });
     setPlanModal(null);
     await fetchData();
@@ -58,7 +58,7 @@ export default function PatientPortalPage() {
 
   async function sendMessage() {
     if (!message.trim()) return;
-    await fetch("/api/patient-portal", { method: "POST", headers: { "Content-Type": "application/json" },
+    await fetch(`https://riveo-health-api-production.up.railway.app/api/patient-portal`, { method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "message", message, patientId: "PAT-DEMO" }) });
     setMessage(""); setMessageSent(true);
     setTimeout(() => setMessageSent(false), 3000);
