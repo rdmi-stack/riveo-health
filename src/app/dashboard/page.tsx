@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  DollarSign, TrendingDown, TrendingUp, FileText, AlertTriangle, Clock,
-  ArrowRight, ArrowUpRight, ArrowDownRight, Loader2, Brain, Sparkles, Zap,
+  DollarSign, TrendingUp, AlertTriangle, Clock,
+  ArrowRight, ArrowUpRight, ArrowDownRight, Loader2, FileText, Sparkles, Brain,
 } from "lucide-react";
 
 interface Analytics {
@@ -28,116 +28,93 @@ export default function DashboardHome() {
   const [seeding, setSeeding] = useState(false);
 
   useEffect(() => { fetchData(); }, []);
-
-  async function fetchData() {
-    try {
-      const res = await fetch("/api/analytics?org=demo");
-      setData(await res.json());
-    } catch {} finally { setLoading(false); }
-  }
-
-  async function seedData() {
-    setSeeding(true);
-    try { await fetch("/api/seed?org=demo"); await fetchData(); } finally { setSeeding(false); }
-  }
+  async function fetchData() { try { setData(await (await fetch("/api/analytics?org=demo")).json()); } catch {} finally { setLoading(false); } }
+  async function seedData() { setSeeding(true); try { await fetch("/api/seed?org=demo"); await fetchData(); } finally { setSeeding(false); } }
 
   if (loading) return (
     <div className="flex items-center justify-center h-96">
-      <div className="text-center">
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-cyan-500/20 flex items-center justify-center mx-auto mb-3 animate-pulse">
-          <Loader2 className="w-6 h-6 text-indigo-400 animate-spin" />
-        </div>
-        <p className="text-sm text-slate-400">Loading dashboard...</p>
-      </div>
+      <Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
     </div>
   );
 
   const d = data?.summary;
   if (!d || d.totalClaims === 0) return (
     <div className="flex flex-col items-center justify-center h-96 text-center">
-      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/10 to-cyan-500/10 border border-indigo-500/20 flex items-center justify-center mb-5">
-        <FileText className="w-10 h-10 text-indigo-400" />
+      <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4">
+        <FileText className="w-8 h-8 text-indigo-500" />
       </div>
-      <h2 className="text-xl font-bold text-white mb-2">Welcome to Riveo Health</h2>
-      <p className="text-slate-400 mb-6 max-w-sm">Import your claims data or load demo data to see your revenue intelligence dashboard.</p>
+      <h2 className="text-xl font-bold text-gray-900 mb-2">Welcome to Riveo Health</h2>
+      <p className="text-gray-500 mb-6 max-w-sm">Import your claims data or load demo data to see your revenue dashboard.</p>
       <div className="flex gap-3">
         <button onClick={seedData} disabled={seeding}
-          className="px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-500 text-white font-medium hover:opacity-90 transition-opacity flex items-center gap-2 shadow-lg shadow-indigo-500/20">
+          className="px-5 py-2.5 rounded-lg bg-indigo-600 text-white font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2 shadow-sm">
           {seeding ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
           {seeding ? "Loading..." : "Load Demo Data"}
         </button>
-        <Link href="/dashboard/import" className="px-6 py-3 rounded-xl border border-white/10 text-white font-medium hover:bg-white/[0.04] transition-all">
-          Import CSV
-        </Link>
+        <Link href="/dashboard/import" className="px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors">Import CSV</Link>
       </div>
     </div>
   );
 
+  const PAYER_COLORS = ["#6366f1", "#06b6d4", "#f43f5e", "#f59e0b", "#8b5cf6", "#10b981"];
+
   return (
     <div>
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-[22px] font-bold text-white">Revenue Dashboard</h1>
-          <p className="text-[13px] text-slate-500 mt-0.5">Last 90 days · All payers</p>
+          <h1 className="text-[20px] font-bold text-gray-900">Revenue Dashboard</h1>
+          <p className="text-[13px] text-gray-400 mt-0.5">Last 90 days · All payers</p>
         </div>
-        <button onClick={seedData} disabled={seeding} className="px-3 py-1.5 text-[11px] rounded-lg border border-white/[0.08] text-slate-500 hover:text-white hover:bg-white/[0.04] transition-all">
+        <button onClick={seedData} disabled={seeding} className="px-3 py-1.5 text-[11px] rounded-md border border-gray-200 text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-all">
           {seeding ? "Refreshing..." : "Refresh Demo"}
         </button>
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
-          { title: "Total Billed", value: fmt$(d.totalBilled), sub: "Last 90 days", icon: DollarSign, gradient: "from-indigo-500 to-indigo-600", shadow: "shadow-indigo-500/15" },
-          { title: "Collected", value: fmt$(d.totalPaid), sub: `${(d.collectionRate * 100).toFixed(1)}% rate`, icon: TrendingUp, gradient: "from-emerald-500 to-emerald-600", shadow: "shadow-emerald-500/15", trend: "up" },
-          { title: "Denied Claims", value: d.totalDenied.toLocaleString(), sub: `${(d.denialRate * 100).toFixed(1)}% denial rate`, icon: AlertTriangle, gradient: "from-rose-500 to-rose-600", shadow: "shadow-rose-500/15", trend: "down" },
-          { title: "Outstanding A/R", value: fmt$(d.outstandingAR), sub: "Pending collection", icon: Clock, gradient: "from-amber-500 to-amber-600", shadow: "shadow-amber-500/15" },
+          { title: "Total Billed", value: fmt$(d.totalBilled), sub: "Last 90 days", icon: DollarSign, iconBg: "bg-indigo-50", iconColor: "text-indigo-600" },
+          { title: "Collected", value: fmt$(d.totalPaid), sub: `${(d.collectionRate * 100).toFixed(1)}% rate`, icon: TrendingUp, iconBg: "bg-emerald-50", iconColor: "text-emerald-600", trend: "up" as const },
+          { title: "Denied Claims", value: d.totalDenied.toLocaleString(), sub: `${(d.denialRate * 100).toFixed(1)}% denial rate`, icon: AlertTriangle, iconBg: "bg-rose-50", iconColor: "text-rose-600", trend: "down" as const },
+          { title: "Outstanding A/R", value: fmt$(d.outstandingAR), sub: "Pending collection", icon: Clock, iconBg: "bg-amber-50", iconColor: "text-amber-600" },
         ].map((card, i) => (
-          <div key={i} className="group relative rounded-2xl border border-white/[0.06] bg-[#0F1423] p-5 hover:border-white/[0.12] transition-all duration-300">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">{card.title}</span>
-              <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${card.gradient} flex items-center justify-center shadow-lg ${card.shadow}`}>
-                <card.icon className="w-4 h-4 text-white" />
+          <div key={i} className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-sm transition-shadow">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">{card.title}</span>
+              <div className={`w-9 h-9 rounded-lg ${card.iconBg} flex items-center justify-center`}>
+                <card.icon className={`w-[17px] h-[17px] ${card.iconColor}`} />
               </div>
             </div>
-            <p className="text-[26px] font-bold text-white tracking-tight leading-none mb-1.5">{card.value}</p>
+            <p className="text-[26px] font-bold text-gray-900 tracking-tight leading-none mb-1">{card.value}</p>
             <div className="flex items-center gap-1 text-[12px]">
-              {card.trend === "up" && <ArrowUpRight className="w-3.5 h-3.5 text-emerald-400" />}
-              {card.trend === "down" && <ArrowDownRight className="w-3.5 h-3.5 text-rose-400" />}
-              <span className={card.trend === "up" ? "text-emerald-400" : card.trend === "down" ? "text-rose-400" : "text-slate-500"}>{card.sub}</span>
+              {card.trend === "up" && <ArrowUpRight className="w-3.5 h-3.5 text-emerald-500" />}
+              {card.trend === "down" && <ArrowDownRight className="w-3.5 h-3.5 text-rose-500" />}
+              <span className={card.trend === "up" ? "text-emerald-600" : card.trend === "down" ? "text-rose-600" : "text-gray-400"}>{card.sub}</span>
             </div>
-            {/* Subtle glow on hover */}
-            <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${card.gradient} opacity-0 group-hover:opacity-[0.03] transition-opacity duration-500 pointer-events-none`} />
           </div>
         ))}
       </div>
 
-      {/* Two column layout */}
-      <div className="grid lg:grid-cols-3 gap-6 mb-8">
-        {/* Denial Breakdown */}
-        <div className="lg:col-span-2 rounded-2xl border border-white/[0.06] bg-[#0F1423] p-6">
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-2">
-              <div className="w-1 h-4 rounded-full bg-gradient-to-b from-rose-500 to-amber-500" />
-              <h3 className="text-[14px] font-semibold text-white">Top Denial Reasons</h3>
-            </div>
-            <Link href="/dashboard/denials" className="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors">
-              View all <ArrowRight className="w-3 h-3" />
-            </Link>
+      {/* Two column */}
+      <div className="grid lg:grid-cols-3 gap-5 mb-6">
+        {/* Denial reasons */}
+        <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-[14px] font-semibold text-gray-900">Top Denial Reasons</h3>
+            <Link href="/dashboard/denials" className="text-[11px] text-indigo-600 hover:text-indigo-700 flex items-center gap-1 font-medium">View all <ArrowRight className="w-3 h-3" /></Link>
           </div>
-          <div className="space-y-3.5">
+          <div className="space-y-3">
             {data!.denialsByReason.slice(0, 6).map((d, i) => {
-              const maxCount = data!.denialsByReason[0]?.count || 1;
-              const pct = (d.count / maxCount) * 100;
+              const max = data!.denialsByReason[0]?.count || 1;
               return (
                 <div key={i}>
-                  <div className="flex justify-between text-[12px] mb-1.5">
-                    <span className="text-slate-300 font-medium">{d._id}</span>
-                    <span className="text-white font-semibold tabular-nums">{d.count} <span className="text-slate-500 font-normal">· {fmt$(d.amount)}</span></span>
+                  <div className="flex justify-between text-[12px] mb-1">
+                    <span className="text-gray-700 font-medium">{d._id}</span>
+                    <span className="text-gray-900 font-semibold tabular-nums">{d.count} <span className="text-gray-400 font-normal">· {fmt$(d.amount)}</span></span>
                   </div>
-                  <div className="h-[6px] rounded-full bg-white/[0.04] overflow-hidden">
-                    <div className="h-full rounded-full bg-gradient-to-r from-rose-500/80 to-amber-500/80 transition-all duration-1000" style={{ width: `${pct}%` }} />
+                  <div className="h-[5px] rounded-full bg-gray-100 overflow-hidden">
+                    <div className="h-full rounded-full bg-gradient-to-r from-rose-400 to-amber-400" style={{ width: `${(d.count / max) * 100}%` }} />
                   </div>
                 </div>
               );
@@ -145,22 +122,19 @@ export default function DashboardHome() {
           </div>
         </div>
 
-        {/* Payer Performance */}
-        <div className="rounded-2xl border border-white/[0.06] bg-[#0F1423] p-6">
-          <div className="flex items-center gap-2 mb-5">
-            <div className="w-1 h-4 rounded-full bg-gradient-to-b from-indigo-500 to-cyan-500" />
-            <h3 className="text-[14px] font-semibold text-white">By Payer</h3>
-          </div>
-          <div className="space-y-3">
+        {/* By Payer */}
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <h3 className="text-[14px] font-semibold text-gray-900 mb-4">By Payer</h3>
+          <div className="space-y-2.5">
             {data!.denialsByPayer.map((p, i) => (
-              <div key={i} className="flex items-center justify-between py-2 border-b border-white/[0.04] last:border-0">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-2 h-2 rounded-full" style={{ background: ["#818cf8", "#22d3ee", "#f472b6", "#fb923c", "#a78bfa", "#34d399"][i] || "#64748b" }} />
-                  <span className="text-[12px] text-slate-300">{p._id}</span>
+              <div key={i} className="flex items-center justify-between py-1.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full" style={{ background: PAYER_COLORS[i] || "#94a3b8" }} />
+                  <span className="text-[12px] text-gray-600">{p._id}</span>
                 </div>
-                <div className="text-right">
-                  <span className="text-[12px] font-semibold text-white tabular-nums">{p.count}</span>
-                  <span className="text-[11px] text-slate-500 ml-1.5">{fmt$(p.amount)}</span>
+                <div>
+                  <span className="text-[12px] font-semibold text-gray-900 tabular-nums">{p.count}</span>
+                  <span className="text-[11px] text-gray-400 ml-1.5">{fmt$(p.amount)}</span>
                 </div>
               </div>
             ))}
@@ -169,74 +143,58 @@ export default function DashboardHome() {
       </div>
 
       {/* Recent Denials */}
-      <div className="rounded-2xl border border-white/[0.06] bg-[#0F1423] overflow-hidden mb-8">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.04]">
-          <div className="flex items-center gap-2">
-            <div className="w-1 h-4 rounded-full bg-gradient-to-b from-rose-500 to-rose-600" />
-            <h3 className="text-[14px] font-semibold text-white">Recent Denials</h3>
-          </div>
-          <Link href="/dashboard/denials" className="text-[11px] text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors">
-            Manage all <ArrowRight className="w-3 h-3" />
-          </Link>
+      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-gray-100">
+          <h3 className="text-[14px] font-semibold text-gray-900">Recent Denials</h3>
+          <Link href="/dashboard/denials" className="text-[11px] text-indigo-600 hover:text-indigo-700 flex items-center gap-1 font-medium">Manage <ArrowRight className="w-3 h-3" /></Link>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="text-[11px] text-slate-500 uppercase tracking-wider">
-                <th className="text-left px-6 py-3 font-semibold">Claim</th>
-                <th className="text-left px-6 py-3 font-semibold">Payer</th>
-                <th className="text-left px-6 py-3 font-semibold">Code</th>
-                <th className="text-right px-6 py-3 font-semibold">Amount</th>
-                <th className="text-left px-6 py-3 font-semibold">Priority</th>
-                <th className="text-left px-6 py-3 font-semibold">Status</th>
+        <table className="w-full">
+          <thead>
+            <tr className="text-[11px] text-gray-400 uppercase tracking-wider bg-gray-50/80">
+              <th className="text-left px-5 py-2.5 font-semibold">Claim</th>
+              <th className="text-left px-5 py-2.5 font-semibold">Payer</th>
+              <th className="text-left px-5 py-2.5 font-semibold">Code</th>
+              <th className="text-right px-5 py-2.5 font-semibold">Amount</th>
+              <th className="text-left px-5 py-2.5 font-semibold">Priority</th>
+              <th className="text-left px-5 py-2.5 font-semibold">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data!.recentDenials.map((d, i) => (
+              <tr key={i} className="border-t border-gray-50 hover:bg-gray-50/50 transition-colors">
+                <td className="px-5 py-3 text-[12px] font-mono text-gray-500">{d.claimId}</td>
+                <td className="px-5 py-3 text-[12px] text-gray-700">{d.payer}</td>
+                <td className="px-5 py-3"><span className="px-1.5 py-0.5 rounded bg-rose-50 text-rose-600 text-[11px] font-mono font-medium">{d.denialCode}</span></td>
+                <td className="px-5 py-3 text-right text-[12px] font-semibold text-gray-900 tabular-nums">${d.billedAmount}</td>
+                <td className="px-5 py-3">
+                  <span className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-medium ${
+                    d.priority === "high" ? "bg-rose-50 text-rose-700" : d.priority === "medium" ? "bg-amber-50 text-amber-700" : "bg-blue-50 text-blue-700"
+                  }`}><span className={`w-1 h-1 rounded-full ${d.priority === "high" ? "bg-rose-500" : d.priority === "medium" ? "bg-amber-500" : "bg-blue-500"}`} />{d.priority}</span>
+                </td>
+                <td className="px-5 py-3">
+                  <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${
+                    d.status === "new" ? "bg-gray-100 text-gray-600" : d.status === "in_progress" ? "bg-amber-50 text-amber-700" : "bg-emerald-50 text-emerald-700"
+                  }`}>{d.status}</span>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {data!.recentDenials.map((d, i) => (
-                <tr key={i} className="border-t border-white/[0.03] hover:bg-white/[0.02] transition-colors">
-                  <td className="px-6 py-3.5 text-[12px] font-mono text-slate-400">{d.claimId}</td>
-                  <td className="px-6 py-3.5 text-[12px] text-slate-300">{d.payer}</td>
-                  <td className="px-6 py-3.5">
-                    <span className="inline-flex px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-400 text-[11px] font-mono">{d.denialCode}</span>
-                  </td>
-                  <td className="px-6 py-3.5 text-right text-[12px] font-semibold text-white tabular-nums">${d.billedAmount}</td>
-                  <td className="px-6 py-3.5">
-                    <span className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-medium ${
-                      d.priority === "high" ? "bg-rose-500/10 text-rose-400" :
-                      d.priority === "medium" ? "bg-amber-500/10 text-amber-400" :
-                      "bg-blue-500/10 text-blue-400"
-                    }`}><span className={`w-1 h-1 rounded-full ${d.priority === "high" ? "bg-rose-400" : d.priority === "medium" ? "bg-amber-400" : "bg-blue-400"}`} />{d.priority}</span>
-                  </td>
-                  <td className="px-6 py-3.5">
-                    <span className={`text-[11px] px-2 py-0.5 rounded-full ${
-                      d.status === "new" ? "bg-slate-500/10 text-slate-400" :
-                      d.status === "in_progress" ? "bg-amber-500/10 text-amber-400" :
-                      "bg-emerald-500/10 text-emerald-400"
-                    }`}>{d.status}</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {/* Monthly Trend */}
       {data!.monthlyTrend.length > 0 && (
-        <div className="rounded-2xl border border-white/[0.06] bg-[#0F1423] p-6">
-          <div className="flex items-center gap-2 mb-5">
-            <div className="w-1 h-4 rounded-full bg-gradient-to-b from-emerald-500 to-emerald-600" />
-            <h3 className="text-[14px] font-semibold text-white">Monthly Trend</h3>
-          </div>
+        <div className="bg-white rounded-xl border border-gray-200 p-5">
+          <h3 className="text-[14px] font-semibold text-gray-900 mb-4">Monthly Trend</h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             {data!.monthlyTrend.map((m, i) => (
-              <div key={i} className="text-center p-4 rounded-xl bg-white/[0.02] border border-white/[0.04] hover:border-white/[0.08] transition-all">
-                <p className="text-[11px] text-slate-500 mb-1">{m._id}</p>
-                <p className="text-[18px] font-bold text-white leading-none">{m.claims}</p>
-                <p className="text-[10px] text-slate-500 mt-0.5">claims</p>
-                <div className="mt-2.5 flex justify-between text-[10px] px-1">
-                  <span className="text-emerald-400">{fmt$(m.paid)}</span>
-                  <span className="text-rose-400">{m.denied} denied</span>
+              <div key={i} className="text-center p-3.5 rounded-lg bg-gray-50 border border-gray-100 hover:border-gray-200 transition-all">
+                <p className="text-[11px] text-gray-400">{m._id}</p>
+                <p className="text-[18px] font-bold text-gray-900 leading-none mt-1">{m.claims}</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">claims</p>
+                <div className="mt-2 flex justify-between text-[10px] px-0.5">
+                  <span className="text-emerald-600">{fmt$(m.paid)}</span>
+                  <span className="text-rose-500">{m.denied} denied</span>
                 </div>
               </div>
             ))}
@@ -244,10 +202,8 @@ export default function DashboardHome() {
         </div>
       )}
 
-      {/* AI Powered Badge */}
-      <div className="mt-8 flex items-center justify-center gap-2 text-[11px] text-slate-600">
-        <Brain className="w-3.5 h-3.5" />
-        Powered by GPT-5.4 · 14 AI features active · HIPAA + DPDP compliant
+      <div className="mt-6 flex items-center justify-center gap-2 text-[11px] text-gray-300">
+        <Brain className="w-3.5 h-3.5" /> Powered by GPT-5.4 · HIPAA + DPDP compliant
       </div>
     </div>
   );
