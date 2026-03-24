@@ -33,6 +33,7 @@ export default function VoiceDemoPage() {
   const [transcript, setTranscript] = useState("");
   const [history, setHistory] = useState<{ role: string; text: string }[]>([]);
   const [callDuration, setCallDuration] = useState(0);
+  const [micError, setMicError] = useState("");
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const recognitionRef = useRef<any>(null);
@@ -147,46 +148,89 @@ export default function VoiceDemoPage() {
   /* ═══════════════════════════════════════════════════
      MIC — Speech-to-Text
      ═══════════════════════════════════════════════════ */
-  function startListening() {
+  async function startListening() {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) return;
+    if (!SR) {
+      setMicError("Speech recognition not supported. Use Chrome.");
+      return;
+    }
+
+    // Request mic permission explicitly
+    try {
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err) {
+      setMicError("Microphone access denied. Please allow mic access and try again.");
+      return;
+    }
 
     stopSpeaking();
     transcriptRef.current = "";
     setTranscript("");
+    setMicError("");
     setCallState("listening");
 
     const recognition = new SR();
-    recognition.continuous = false;
+    recognition.continuous = true;  // Keep listening until silence
     recognition.interimResults = true;
     recognition.lang = "en-US";
     recognition.maxAlternatives = 1;
+
+    let silenceTimer: NodeJS.Timeout | null = null;
+    let hasSpoken = false;
 
     recognition.onresult = (e: any) => {
       let t = "";
       for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
       transcriptRef.current = t;
       setTranscript(t);
+      hasSpoken = true;
+
+      // Reset silence timer — send after 1.5s of silence
+      if (silenceTimer) clearTimeout(silenceTimer);
+      silenceTimer = setTimeout(() => {
+        const final = transcriptRef.current.trim();
+        if (final && shouldListenRef.current) {
+          try { recognition.stop(); } catch {}
+          sendToAI(final);
+        }
+      }, 1500);
     };
 
     recognition.onend = () => {
+      if (silenceTimer) clearTimeout(silenceTimer);
       const final = transcriptRef.current.trim();
       if (final && shouldListenRef.current) {
         sendToAI(final);
-      } else if (shouldListenRef.current) {
-        // No speech detected, listen again
+      } else if (shouldListenRef.current && !hasSpoken) {
+        // No speech at all — retry
         autoListen();
       }
     };
 
     recognition.onerror = (e: any) => {
-      if (e.error === "no-speech" && shouldListenRef.current) {
-        autoListen(); // Retry
+      if (silenceTimer) clearTimeout(silenceTimer);
+      if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+        setMicError("Microphone blocked. Check browser permissions.");
+      } else if (e.error === "no-speech" && shouldListenRef.current) {
+        autoListen();
+      } else if (e.error === "aborted") {
+        // Normal when we stop it
+      } else {
+        console.log("Speech error:", e.error);
+        if (shouldListenRef.current) autoListen();
       }
     };
 
+    recognition.onaudiostart = () => {
+      setCallState("listening");
+    };
+
     recognitionRef.current = recognition;
-    try { recognition.start(); } catch {}
+    try {
+      recognition.start();
+    } catch (err) {
+      setMicError("Could not start microphone. Try refreshing the page.");
+    }
   }
 
   function stopListening() {
@@ -364,6 +408,13 @@ export default function VoiceDemoPage() {
                   </button>
                 )}
               </div>
+
+              {/* Mic error */}
+              {micError && (
+                <div className="mt-4 px-4 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-[12px] text-rose-400 text-center max-w-md">
+                  {micError}
+                </div>
+              )}
 
               {/* Conversation transcript */}
               {history.length > 0 && (
