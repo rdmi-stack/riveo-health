@@ -46,6 +46,13 @@ export default function VoiceDemoPage() {
   useEffect(() => { historyRef.current = history; }, [history]);
   useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }); }, [history]);
 
+  // Request mic permission on page load
+  useEffect(() => {
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => { stream.getTracks().forEach(t => t.stop()); }) // Got permission, release immediately
+      .catch(() => { setShowMicHelp(true); }); // Show help modal
+  }, []);
+
   async function startCall() {
     setCallActive(true); setCallState("connecting"); setHistory([]); setCallDuration(0); shouldListenRef.current = true;
     callTimerRef.current = setInterval(() => setCallDuration(d => d + 1), 1000);
