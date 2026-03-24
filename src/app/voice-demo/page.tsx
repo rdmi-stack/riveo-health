@@ -405,6 +405,18 @@ export default function VoiceDemoPage() {
                 )}
               </div>
 
+              {/* Text input fallback — type if mic doesn't work */}
+              {callActive && (
+                <form onSubmit={(e) => { e.preventDefault(); const input = (e.target as HTMLFormElement).querySelector("input") as HTMLInputElement; if (input.value.trim()) { stopListening(); sendToAI(input.value.trim()); input.value = ""; } }}
+                  className="mt-4 flex gap-2 w-full max-w-md">
+                  <input type="text" placeholder="Or type here if mic isn't working..."
+                    className="flex-1 px-3 py-2 rounded-xl bg-white/[0.05] border border-white/10 text-[12px] text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500/50" />
+                  <button type="submit" className="px-3 py-2 rounded-xl bg-indigo-600 text-white hover:bg-indigo-700">
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </form>
+              )}
+
               {/* Mic error */}
               {micError && callState !== "listening" && callState !== "ai_speaking" && callState !== "processing" && (
                 <div className="mt-4 px-4 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-[12px] text-rose-400 text-center max-w-md">
