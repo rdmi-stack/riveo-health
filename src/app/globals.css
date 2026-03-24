@@ -140,3 +140,9 @@ body {
 .transition-opacity.duration-400 {
   transition-duration: 400ms;
 }
+
+/* Voice waveform animation */
+@keyframes waveBar {
+  0% { transform: scaleY(0.3); }
+  100% { transform: scaleY(1); }
+}
