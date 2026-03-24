@@ -8,7 +8,7 @@ import {
   Activity, LogOut, Bell, Search, Shield, Brain, ShieldCheck,
   MessageSquare, RefreshCw, Plug, CircleDollarSign, SearchCheck, UserCheck,
   ListChecks, BookOpen, Radar, FileScan, ShieldAlert, ChevronDown,
-  PanelLeftClose, PanelLeft, HelpCircle, CheckCircle, X, Calculator,
+  PanelLeftClose, PanelLeft, HelpCircle, CheckCircle, X, Calculator, Send,
 } from "lucide-react";
 
 const NAV_GROUPS = [
@@ -35,6 +35,7 @@ const NAV_GROUPS = [
   ]},
   { label: "Patient", items: [
     { href: "/dashboard/chat", label: "Chat Agent", icon: MessageSquare },
+    { href: "/dashboard/statements", label: "Statements", icon: Send },
     { href: "/dashboard/patient-billing", label: "Smart Billing", icon: UserCheck },
     { href: "/dashboard/pre-collection", label: "Pre-Collection", icon: ListChecks },
   ]},
