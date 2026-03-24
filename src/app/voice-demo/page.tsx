@@ -40,12 +40,15 @@ export default function VoiceDemoPage() {
   ]);
   const [showBill, setShowBill] = useState(true);
   const recognitionRef = useRef<any>(null);
-  const synthRef = useRef<SpeechSynthesis | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    synthRef.current = window.speechSynthesis;
-    // Speak the greeting
+    audioRef.current = new Audio();
+    audioRef.current.onplay = () => setSpeaking(true);
+    audioRef.current.onended = () => setSpeaking(false);
+    audioRef.current.onerror = () => setSpeaking(false);
+    // Speak greeting
     speak(history[0].text);
   }, []);
 
@@ -53,20 +56,40 @@ export default function VoiceDemoPage() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [history]);
 
-  /* ── Text-to-Speech ───────────────────────────────── */
-  function speak(text: string) {
-    if (!synthRef.current) return;
-    synthRef.current.cancel();
+  /* ── Text-to-Speech via Resemble AI ───────────────── */
+  async function speak(text: string) {
+    setSpeaking(true);
+    try {
+      const res = await fetch("/api/voice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      const data = await res.json();
+      if (data.audioUrl && audioRef.current) {
+        audioRef.current.src = data.audioUrl;
+        audioRef.current.play().catch(() => setSpeaking(false));
+      } else {
+        // Fallback to browser TTS if Resemble fails
+        fallbackSpeak(text);
+      }
+    } catch {
+      fallbackSpeak(text);
+    }
+  }
+
+  function fallbackSpeak(text: string) {
+    const synth = window.speechSynthesis;
+    synth.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 1.05;
     utterance.pitch = 1.1;
-    // Try to find a female voice
-    const voices = synthRef.current.getVoices();
-    const preferred = voices.find(v => v.name.includes("Samantha") || v.name.includes("Karen") || v.name.includes("Female") || (v.lang === "en-US" && v.name.includes("Google")));
+    const voices = synth.getVoices();
+    const preferred = voices.find(v => v.name.includes("Samantha") || v.name.includes("Karen") || v.lang === "en-US");
     if (preferred) utterance.voice = preferred;
     utterance.onstart = () => setSpeaking(true);
     utterance.onend = () => setSpeaking(false);
-    synthRef.current.speak(utterance);
+    synth.speak(utterance);
   }
 
   /* ── Speech-to-Text ───────────────────────────────── */
@@ -78,7 +101,8 @@ export default function VoiceDemoPage() {
     }
 
     // Stop any ongoing speech
-    synthRef.current?.cancel();
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
+    window.speechSynthesis?.cancel();
     setSpeaking(false);
 
     const recognition = new SpeechRecognition();
