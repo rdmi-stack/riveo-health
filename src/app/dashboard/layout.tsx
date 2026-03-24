@@ -9,6 +9,7 @@ import {
   MessageSquare, RefreshCw, Plug, CircleDollarSign, SearchCheck, UserCheck,
   ListChecks, BookOpen, Radar, FileScan, ShieldAlert, ChevronDown,
   PanelLeftClose, PanelLeft, HelpCircle, CheckCircle, X, Calculator, Send,
+  Calendar, ClipboardList, Phone, DollarSign,
 } from "lucide-react";
 
 const NAV_GROUPS = [
@@ -16,9 +17,14 @@ const NAV_GROUPS = [
     { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
     { href: "/dashboard/eligibility", label: "Eligibility", icon: ShieldCheck },
     { href: "/dashboard/estimates", label: "Estimates", icon: Calculator },
+    { href: "/dashboard/scheduling", label: "Scheduling", icon: Calendar },
+    { href: "/dashboard/check-in", label: "Check-In", icon: ClipboardList },
     { href: "/dashboard/claims", label: "Claims", icon: FileText },
+    { href: "/dashboard/claim-scrubber", label: "Claim Scrubber", icon: ShieldAlert },
+    { href: "/dashboard/claim-status", label: "Claim Status", icon: RefreshCw },
     { href: "/dashboard/denials", label: "Denials", icon: AlertTriangle },
     { href: "/dashboard/resubmit", label: "Auto-Resubmit", icon: RefreshCw },
+    { href: "/dashboard/remittance", label: "Remittance", icon: DollarSign },
   ]},
   { label: "AI Engine", items: [
     { href: "/dashboard/predictions", label: "Denial Prediction", icon: Shield },
@@ -26,6 +32,7 @@ const NAV_GROUPS = [
     { href: "/dashboard/coding-audit", label: "Coding Audit", icon: ShieldAlert },
     { href: "/dashboard/cdi", label: "CDI Review", icon: FileScan },
     { href: "/dashboard/prior-auth", label: "Prior Auth", icon: ShieldCheck },
+    { href: "/dashboard/voice-agent", label: "Voice Agent", icon: Phone },
   ]},
   { label: "Revenue Recovery", items: [
     { href: "/dashboard/underpayment", label: "Underpayments", icon: CircleDollarSign },
