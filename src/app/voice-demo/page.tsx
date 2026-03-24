@@ -2,127 +2,165 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
-import {
-  Activity, Mic, MicOff, Bot, User, Loader2, ArrowRight,
-  Shield, Clock, CheckCircle, CreditCard, MessageSquare,
-  Volume2, Phone,
-} from "lucide-react";
+import { Activity, Mic, PhoneOff, Bot, User, Loader2, ArrowRight, Shield, Volume2, Phone } from "lucide-react";
 
 const PATIENT = {
   name: "Emily Johnson", id: "PAT-29381",
   bills: [
-    { date: "Aug 29, 2026", provider: "Dr. Maria Rodriguez", location: "ABC Medical", service: "Preventive visit, established patient", cpt: "99396", billed: 180, adjustment: -30, insurancePaid: 120, copay: 30, youOwe: 0 },
-    { date: "Aug 29, 2026", provider: "Dr. Maria Rodriguez", location: "ABC Medical", service: "Office Visit (Level 3)", cpt: "99213", billed: 75, adjustment: -15, insurancePaid: 40, copay: 0, youOwe: 20 },
+    { date: "Aug 29, 2026", provider: "Dr. Maria Rodriguez", location: "ABC Medical", service: "Preventive visit", cpt: "99396", billed: 180, insurancePaid: 120, copay: 30, youOwe: 0 },
+    { date: "Aug 29, 2026", provider: "Dr. Maria Rodriguez", location: "ABC Medical", service: "Office Visit (Level 3)", cpt: "99213", billed: 75, insurancePaid: 40, copay: 0, youOwe: 20 },
   ],
-  insurance: "Aetna Commercial",
-  totalBilled: 255, totalAdjustment: -45, totalInsurancePaid: 160, alreadyPaid: 30, totalOutstanding: 20,
+  insurance: "Aetna Commercial", totalBilled: 255, totalInsurancePaid: 160, alreadyPaid: 30, totalOutstanding: 20,
 };
 
 const SUGGESTED = [
-  "I was surprised to get this bill... why am I receiving it?",
-  "What visits are included in my total balance?",
-  "What kind of payment options do I have?",
-  "I thought I already paid something at the visit...",
-  "I thought my insurance would cover this...",
+  "Why am I receiving this bill?",
+  "What visits are included?",
+  "What payment options do I have?",
+  "I already paid at the visit...",
+  "My insurance should cover this",
 ];
 
 function fmt$(n: number) { return `$${Math.abs(n).toFixed(2)}`; }
 
-const GREETING = `Hi Emily! I'm your billing assistant. I can see your account has an outstanding balance of $20.00. How can I help you today?`;
+const GREETING = "Hi Emily! I'm your billing assistant at Riveo Health. I can see your account has an outstanding balance of twenty dollars from your visit on August 29th. How can I help you today?";
+
+type CallState = "idle" | "connecting" | "ai_speaking" | "listening" | "processing";
 
 export default function VoiceDemoPage() {
+  const [callState, setCallState] = useState<CallState>("idle");
+  const [callActive, setCallActive] = useState(false);
   const [transcript, setTranscript] = useState("");
-  const [listening, setListening] = useState(false);
-  const [processing, setProcessing] = useState(false);
-  const [speaking, setSpeaking] = useState(false);
-  const [history, setHistory] = useState<{ role: string; text: string }[]>([
-    { role: "ai", text: GREETING },
-  ]);
+  const [history, setHistory] = useState<{ role: string; text: string }[]>([]);
+  const [callDuration, setCallDuration] = useState(0);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const recognitionRef = useRef<any>(null);
+  const transcriptRef = useRef("");
+  const historyRef = useRef<{ role: string; text: string }[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const transcriptRef = useRef(""); // Mutable ref to capture final transcript
-  const historyRef = useRef(history);
+  const callTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const shouldListenRef = useRef(false);
 
-  // Keep historyRef in sync
   useEffect(() => { historyRef.current = history; }, [history]);
+  useEffect(() => { scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" }); }, [history]);
 
-  // Init audio + speak greeting
-  useEffect(() => {
-    audioRef.current = new Audio();
-    audioRef.current.onplay = () => setSpeaking(true);
-    audioRef.current.onended = () => setSpeaking(false);
-    audioRef.current.onerror = () => setSpeaking(false);
-    speakText(GREETING);
-  }, []);
+  /* ═══════════════════════════════════════════════════
+     START CALL — one click starts everything
+     ═══════════════════════════════════════════════════ */
+  function startCall() {
+    setCallActive(true);
+    setCallState("connecting");
+    setHistory([]);
+    setCallDuration(0);
+    shouldListenRef.current = true;
 
-  useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [history]);
+    // Start call timer
+    callTimerRef.current = setInterval(() => setCallDuration(d => d + 1), 1000);
 
-  /* ── Resemble AI TTS with fallback ────────────────── */
-  async function speakText(text: string) {
-    setSpeaking(true);
+    // Small delay to simulate connecting, then AI greeting
+    setTimeout(() => {
+      const greetMsg = { role: "ai", text: GREETING };
+      setHistory([greetMsg]);
+      historyRef.current = [greetMsg];
+      aiSpeak(GREETING);
+    }, 800);
+  }
+
+  /* ═══════════════════════════════════════════════════
+     END CALL
+     ═══════════════════════════════════════════════════ */
+  function endCall() {
+    shouldListenRef.current = false;
+    setCallActive(false);
+    setCallState("idle");
+    stopListening();
+    stopSpeaking();
+    if (callTimerRef.current) clearInterval(callTimerRef.current);
+  }
+
+  /* ═══════════════════════════════════════════════════
+     AI SPEAK — then auto-listen when done
+     ═══════════════════════════════════════════════════ */
+  async function aiSpeak(text: string) {
+    setCallState("ai_speaking");
+
     try {
+      // Try Resemble AI
       const res = await fetch("/api/voice", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
       });
       const data = await res.json();
-      if (data.audioUrl && audioRef.current) {
+
+      if (data.audioUrl) {
+        if (!audioRef.current) audioRef.current = new Audio();
         audioRef.current.src = data.audioUrl;
+        audioRef.current.onended = () => {
+          setCallState("idle");
+          if (shouldListenRef.current) autoListen();
+        };
+        audioRef.current.onerror = () => {
+          browserSpeak(text);
+        };
         await audioRef.current.play();
         return;
       }
     } catch {}
-    // Fallback: browser TTS
+
+    // Fallback
     browserSpeak(text);
   }
 
   function browserSpeak(text: string) {
     const synth = window.speechSynthesis;
-    if (!synth) { setSpeaking(false); return; }
+    if (!synth) { if (shouldListenRef.current) autoListen(); return; }
     synth.cancel();
     const u = new SpeechSynthesisUtterance(text);
-    u.rate = 1.05; u.pitch = 1.1;
+    u.rate = 1.0; u.pitch = 1.1;
     const voices = synth.getVoices();
-    const pref = voices.find(v => v.name.includes("Samantha") || v.name.includes("Karen") || v.lang === "en-US");
+    const pref = voices.find(v => v.name.includes("Samantha")) || voices.find(v => v.lang.startsWith("en") && v.name.includes("Female")) || voices.find(v => v.lang.startsWith("en"));
     if (pref) u.voice = pref;
-    u.onstart = () => setSpeaking(true);
-    u.onend = () => setSpeaking(false);
+    u.onend = () => {
+      setCallState("idle");
+      if (shouldListenRef.current) autoListen();
+    };
     synth.speak(u);
   }
 
   function stopSpeaking() {
     if (audioRef.current) { audioRef.current.pause(); audioRef.current.currentTime = 0; }
     window.speechSynthesis?.cancel();
-    setSpeaking(false);
   }
 
-  /* ── Speech-to-Text (mic) ─────────────────────────── */
-  function toggleMic() {
-    if (listening) {
-      stopListening();
-    } else {
-      startListening();
-    }
+  /* ═══════════════════════════════════════════════════
+     AUTO-LISTEN — starts mic automatically after AI speaks
+     ═══════════════════════════════════════════════════ */
+  function autoListen() {
+    if (!shouldListenRef.current) return;
+    setTimeout(() => {
+      if (shouldListenRef.current) startListening();
+    }, 400); // Small pause before listening
   }
 
+  /* ═══════════════════════════════════════════════════
+     MIC — Speech-to-Text
+     ═══════════════════════════════════════════════════ */
   function startListening() {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) { alert("Please use Chrome for voice support."); return; }
+    if (!SR) return;
 
     stopSpeaking();
     transcriptRef.current = "";
     setTranscript("");
+    setCallState("listening");
 
     const recognition = new SR();
     recognition.continuous = false;
     recognition.interimResults = true;
     recognition.lang = "en-US";
-
-    recognition.onstart = () => setListening(true);
+    recognition.maxAlternatives = 1;
 
     recognition.onresult = (e: any) => {
       let t = "";
@@ -132,36 +170,40 @@ export default function VoiceDemoPage() {
     };
 
     recognition.onend = () => {
-      setListening(false);
-      const finalText = transcriptRef.current.trim();
-      if (finalText) {
-        sendToAI(finalText);
+      const final = transcriptRef.current.trim();
+      if (final && shouldListenRef.current) {
+        sendToAI(final);
+      } else if (shouldListenRef.current) {
+        // No speech detected, listen again
+        autoListen();
       }
     };
 
-    recognition.onerror = () => { setListening(false); };
+    recognition.onerror = (e: any) => {
+      if (e.error === "no-speech" && shouldListenRef.current) {
+        autoListen(); // Retry
+      }
+    };
 
-    recognition.start();
+    recognitionRef.current = recognition;
+    try { recognition.start(); } catch {}
   }
 
   function stopListening() {
-    // Manually stop — onend will fire and auto-send
-    try {
-      const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      // Stop via the native API
-    } catch {}
-    setListening(false);
-    const finalText = transcriptRef.current.trim();
-    if (finalText) sendToAI(finalText);
+    try { recognitionRef.current?.stop(); } catch {}
+    recognitionRef.current = null;
   }
 
-  /* ── Send to AI + speak response ──────────────────── */
+  /* ═══════════════════════════════════════════════════
+     SEND TO AI — process + speak response
+     ═══════════════════════════════════════════════════ */
   async function sendToAI(text: string) {
-    if (!text || processing) return;
-    setHistory(prev => [...prev, { role: "user", text }]);
+    setCallState("processing");
     setTranscript("");
     transcriptRef.current = "";
-    setProcessing(true);
+    stopListening();
+
+    setHistory(prev => [...prev, { role: "user", text }]);
 
     try {
       const res = await fetch("/api/voice-agent", {
@@ -175,25 +217,47 @@ export default function VoiceDemoPage() {
         }),
       });
       const data = await res.json();
-      const reply = data.response || "I'm sorry, let me transfer you to our billing team.";
+      const reply = data.response || "I'm sorry, could you say that again?";
       setHistory(prev => [...prev, { role: "ai", text: reply }]);
-      speakText(reply);
+      aiSpeak(reply);
     } catch {
-      const fallback = "I'm having trouble right now. Let me connect you with a team member.";
+      const fallback = "I'm having a little trouble. Could you repeat that?";
       setHistory(prev => [...prev, { role: "ai", text: fallback }]);
-      speakText(fallback);
-    } finally {
-      setProcessing(false);
+      aiSpeak(fallback);
     }
   }
+
+  /* ═══════════════════════════════════════════════════
+     HANDLE SUGGESTED QUESTION
+     ═══════════════════════════════════════════════════ */
+  function askSuggested(text: string) {
+    if (!callActive) {
+      // Start call then ask
+      setCallActive(true);
+      setCallState("connecting");
+      shouldListenRef.current = true;
+      callTimerRef.current = setInterval(() => setCallDuration(d => d + 1), 1000);
+      setHistory([{ role: "ai", text: GREETING }]);
+      historyRef.current = [{ role: "ai", text: GREETING }];
+      setTimeout(() => sendToAI(text), 500);
+    } else {
+      stopSpeaking();
+      stopListening();
+      sendToAI(text);
+    }
+  }
+
+  function formatTime(s: number) { return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; }
+
+  const isActive = callState === "ai_speaking" || callState === "listening" || callState === "processing";
 
   return (
     <div className="min-h-screen bg-[#0a0e1a]">
       {/* Announcement */}
       <div className="bg-indigo-600">
         <div className="max-w-6xl mx-auto px-4 py-2.5 flex items-center justify-between">
-          <p className="text-[13px] text-white flex items-center gap-2"><Phone className="w-3.5 h-3.5" /> For healthcare leaders: talk with our AI voice agent for patient billing — live, right now →</p>
-          <Link href="/demo" className="px-4 py-1.5 rounded-lg bg-white text-indigo-600 text-[12px] font-semibold hover:bg-indigo-50">Talk to Agent now</Link>
+          <p className="text-[13px] text-white flex items-center gap-2"><Phone className="w-3.5 h-3.5" /> For healthcare leaders: talk with our AI voice agent — live, right now →</p>
+          <Link href="/demo" className="px-4 py-1.5 rounded-lg bg-white text-indigo-600 text-[12px] font-semibold hover:bg-indigo-50">Talk now</Link>
         </div>
       </div>
 
@@ -204,11 +268,6 @@ export default function VoiceDemoPage() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-cyan-400 flex items-center justify-center"><Activity className="w-[18px] h-[18px] text-white" /></div>
             <span className="text-[16px] font-bold text-white">Riveo <span className="text-indigo-400">Health</span></span>
           </Link>
-          <div className="hidden md:flex items-center gap-8 text-[13px] text-slate-400">
-            <Link href="/platform" className="hover:text-white">AI Voice Agent</Link>
-            <Link href="/solutions" className="hover:text-white">Solutions</Link>
-            <Link href="/blog" className="hover:text-white">Blog</Link>
-          </div>
           <div className="flex items-center gap-3">
             <Link href="/login" className="px-4 py-2 text-[13px] text-white border border-white/20 rounded-lg hover:bg-white/5">Login</Link>
             <Link href="/demo" className="px-4 py-2 text-[13px] text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 font-medium">Request a Demo</Link>
@@ -218,123 +277,156 @@ export default function VoiceDemoPage() {
 
       {/* Main */}
       <div className="max-w-6xl mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-12 pt-20 pb-16">
+        <div className="grid lg:grid-cols-2 gap-12 pt-16 pb-16">
           {/* Left */}
-          <div>
-            <h1 className="text-[46px] font-bold text-white leading-[1.1] mb-6">
+          <div className="flex flex-col items-center lg:items-start">
+            <h1 className="text-[42px] font-bold text-white leading-[1.1] mb-4 text-center lg:text-left">
               Try <span className="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">Voice AI Agent</span><br />for Patient Billing
             </h1>
-            <p className="text-[16px] text-slate-400 mb-8 leading-relaxed max-w-lg">
+            <p className="text-[15px] text-slate-400 mb-10 text-center lg:text-left max-w-lg">
               You&apos;re Emily Johnson, a patient who just received her medical bill.
-              Ask about your charges, payment options, or insurance details — <strong className="text-white">just press the button and talk.</strong>
+              Ask about your charges, payment options, or insurance — <strong className="text-white">press the button and talk.</strong>
             </p>
 
-            {/* Suggested */}
-            <div className="flex flex-wrap gap-2 mb-8">
+            {/* Suggested — only show when idle or during call */}
+            <div className="flex flex-wrap gap-2 mb-8 justify-center lg:justify-start">
               {SUGGESTED.map((q, i) => (
-                <button key={i} onClick={() => sendToAI(q)} disabled={processing || listening}
-                  className="px-3 py-2 rounded-xl bg-white/[0.05] border border-white/10 text-[12px] text-slate-400 hover:bg-white/10 hover:text-white transition-all disabled:opacity-40">
-                  {q}
+                <button key={i} onClick={() => askSuggested(q)}
+                  disabled={callState === "processing"}
+                  className="px-3 py-2 rounded-xl bg-white/[0.05] border border-white/10 text-[11px] text-slate-400 hover:bg-white/10 hover:text-white transition-all disabled:opacity-30">
+                  &ldquo;{q}&rdquo;
                 </button>
               ))}
             </div>
 
-            {/* Voice button */}
-            <div className="flex flex-col items-center">
-              <button onClick={toggleMic} disabled={processing}
-                className={`relative w-56 h-16 rounded-2xl font-semibold text-[16px] flex items-center justify-center gap-3 transition-all shadow-2xl cursor-pointer ${
-                  listening ? "bg-rose-500 text-white shadow-rose-500/30 scale-105"
-                  : processing ? "bg-slate-700 text-slate-400 cursor-wait"
-                  : speaking ? "bg-indigo-500 text-white shadow-indigo-500/30"
-                  : "bg-amber-400 text-slate-900 hover:bg-amber-300 shadow-amber-400/20 hover:scale-[1.02]"
-                }`}>
-                {processing ? <><Loader2 className="w-5 h-5 animate-spin" /> Thinking...</>
-                  : listening ? <><div className="w-5 h-5 rounded-full bg-white animate-pulse" /> Listening...</>
-                  : speaking ? <><Volume2 className="w-5 h-5 animate-pulse" /> Speaking...</>
-                  : <><span>Talk to Agent</span> <Mic className="w-5 h-5" /></>}
-                {listening && <span className="absolute inset-0 rounded-2xl bg-rose-500 animate-ping opacity-20" />}
-              </button>
+            {/* ── CALL INTERFACE ─────────────────────── */}
+            <div className="w-full max-w-md mx-auto lg:mx-0">
+              {/* Waveform + Button */}
+              <div className="flex flex-col items-center">
 
-              {/* Waveform */}
-              {(listening || speaking) && (
-                <div className="mt-5 flex items-center justify-center gap-[3px] h-10">
-                  {Array.from({ length: 32 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className={`w-[3px] rounded-full ${listening ? "bg-rose-400" : "bg-indigo-400"}`}
-                      style={{
-                        height: `${8 + Math.random() * 24}px`,
-                        animation: `waveBar ${0.3 + Math.random() * 0.4}s ease-in-out ${i * 0.02}s infinite alternate`,
-                      }}
-                    />
-                  ))}
+                {/* Waveform */}
+                <div className="h-16 flex items-center justify-center gap-[2px] mb-6 w-full">
+                  {isActive ? (
+                    Array.from({ length: 40 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className={`w-[3px] rounded-full transition-colors ${
+                          callState === "listening" ? "bg-rose-400" :
+                          callState === "ai_speaking" ? "bg-indigo-400" :
+                          "bg-amber-400"
+                        }`}
+                        style={{
+                          height: `${6 + Math.random() * 40}px`,
+                          animation: `waveBar ${0.2 + Math.random() * 0.5}s ease-in-out ${i * 0.015}s infinite alternate`,
+                        }}
+                      />
+                    ))
+                  ) : callActive ? (
+                    // Flat line when paused
+                    Array.from({ length: 40 }).map((_, i) => (
+                      <div key={i} className="w-[3px] h-[3px] rounded-full bg-slate-600" />
+                    ))
+                  ) : null}
                 </div>
-              )}
 
-              {/* Transcript */}
-              {(listening || transcript) && (
-                <div className="mt-4 px-4 py-2 rounded-xl bg-white/[0.05] border border-white/10 text-[13px] text-slate-300 min-h-[40px] max-w-md text-center">
-                  {listening && !transcript && <span className="text-slate-500 animate-pulse">Listening...</span>}
-                  {transcript && <span>&quot;{transcript}&quot;</span>}
+                {/* Status text */}
+                {callActive && (
+                  <div className="mb-4 text-center">
+                    <p className={`text-[13px] font-medium ${
+                      callState === "listening" ? "text-rose-400" :
+                      callState === "ai_speaking" ? "text-indigo-400" :
+                      callState === "processing" ? "text-amber-400" :
+                      "text-slate-500"
+                    }`}>
+                      {callState === "listening" ? "Listening..." :
+                       callState === "ai_speaking" ? "Agent is speaking..." :
+                       callState === "processing" ? "Thinking..." :
+                       callState === "connecting" ? "Connecting..." :
+                       "Connected"}
+                    </p>
+                    {transcript && callState === "listening" && (
+                      <p className="text-[12px] text-slate-400 mt-1 italic">&ldquo;{transcript}&rdquo;</p>
+                    )}
+                    <p className="text-[11px] text-slate-600 mt-1">{formatTime(callDuration)}</p>
+                  </div>
+                )}
+
+                {/* Main button */}
+                {!callActive ? (
+                  <button onClick={startCall}
+                    className="w-56 h-16 rounded-2xl bg-amber-400 text-slate-900 font-bold text-[16px] flex items-center justify-center gap-3 shadow-2xl shadow-amber-400/20 hover:bg-amber-300 hover:scale-[1.02] transition-all active:scale-95">
+                    Talk to Agent <Mic className="w-5 h-5" />
+                  </button>
+                ) : (
+                  <button onClick={endCall}
+                    className="w-56 h-14 rounded-2xl bg-rose-500 text-white font-semibold text-[15px] flex items-center justify-center gap-2 shadow-2xl shadow-rose-500/30 hover:bg-rose-600 transition-all active:scale-95">
+                    <PhoneOff className="w-5 h-5" /> End Call
+                  </button>
+                )}
+              </div>
+
+              {/* Conversation transcript */}
+              {history.length > 0 && (
+                <div ref={scrollRef} className="mt-8 max-h-56 overflow-y-auto space-y-3 px-1">
+                  {history.map((h, i) => (
+                    <div key={i} className={`flex gap-2 ${h.role === "user" ? "justify-end" : ""}`}>
+                      {h.role === "ai" && <div className="w-6 h-6 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center shrink-0 mt-0.5"><Bot className="w-3 h-3 text-indigo-400" /></div>}
+                      <div className={`max-w-[85%] px-3 py-2 rounded-xl text-[12px] leading-relaxed ${h.role === "user" ? "bg-indigo-600 text-white rounded-br-sm" : "bg-white/[0.05] text-slate-300 border border-white/[0.06] rounded-bl-sm"}`}>
+                        {h.text}
+                      </div>
+                      {h.role === "user" && <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center shrink-0 mt-0.5"><User className="w-3 h-3 text-slate-400" /></div>}
+                    </div>
+                  ))}
+                  {callState === "processing" && (
+                    <div className="flex gap-2"><div className="w-6 h-6 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center shrink-0"><Loader2 className="w-3 h-3 text-indigo-400 animate-spin" /></div><div className="px-3 py-2 rounded-xl bg-white/[0.05] border border-white/[0.06] rounded-bl-sm flex gap-1"><span className="w-1.5 h-1.5 rounded-full bg-indigo-400/50 animate-bounce" /><span className="w-1.5 h-1.5 rounded-full bg-indigo-400/50 animate-bounce" style={{ animationDelay: "0.15s" }} /><span className="w-1.5 h-1.5 rounded-full bg-indigo-400/50 animate-bounce" style={{ animationDelay: "0.3s" }} /></div></div>
+                  )}
                 </div>
               )}
             </div>
-
-            {/* Conversation */}
-            {history.length > 1 && (
-              <div ref={scrollRef} className="mt-8 max-h-52 overflow-y-auto space-y-3 pr-2">
-                {history.map((h, i) => (
-                  <div key={i} className={`flex gap-2 ${h.role === "user" ? "justify-end" : ""}`}>
-                    {h.role === "ai" && <div className="w-6 h-6 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center shrink-0 mt-0.5"><Bot className="w-3 h-3 text-indigo-400" /></div>}
-                    <div className={`max-w-[85%] px-3 py-2 rounded-xl text-[12px] ${h.role === "user" ? "bg-indigo-600 text-white rounded-br-sm" : "bg-white/[0.05] text-slate-300 border border-white/[0.06] rounded-bl-sm"}`}>{h.text}</div>
-                    {h.role === "user" && <div className="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center shrink-0 mt-0.5"><User className="w-3 h-3 text-slate-400" /></div>}
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
-          {/* Right — Phone mockup */}
-          <div className="flex justify-center">
-            <div className="w-[320px] rounded-[36px] bg-slate-900 border-[3px] border-slate-700 overflow-hidden shadow-2xl shadow-black/50">
-              <div className="flex items-center justify-between px-6 pt-3 pb-2">
-                <span className="text-[12px] text-white font-medium">9:41</span>
-                <div className="w-20 h-5 rounded-full bg-black" />
-                <div className="flex items-center gap-1"><div className="flex gap-px">{[1,2,3,4].map(i => <div key={i} className={`w-[3px] rounded-sm bg-white ${i===4?"h-2.5":i===3?"h-2":i===2?"h-1.5":"h-1"}`} />)}</div><span className="text-[10px] text-white ml-1">5G</span></div>
-              </div>
-              <div className="bg-indigo-700 px-5 py-4"><p className="text-[14px] font-semibold text-white">Hi Emily, this is your bill</p></div>
-              <div className="bg-white px-5 py-4 h-[460px] overflow-y-auto">
-                <h3 className="text-[13px] font-bold text-gray-900 mb-2">Recent visit</h3>
-                <div className="space-y-1.5 text-[11px] mb-4">
-                  <div className="flex justify-between"><span className="text-gray-500">Date</span><span className="text-gray-900">{PATIENT.bills[0].date}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Provider</span><span className="text-gray-900">{PATIENT.bills[0].provider}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Location</span><span className="text-gray-900">{PATIENT.bills[0].location}</span></div>
+          {/* Right — Phone */}
+          <div className="hidden lg:flex justify-center items-start pt-8">
+            <div className="relative">
+              <p className="text-[12px] text-slate-500 text-center mb-3">Scroll inside to view Emily&apos;s bill</p>
+              <div className="w-[300px] rounded-[32px] bg-slate-900 border-[3px] border-slate-700 overflow-hidden shadow-2xl shadow-black/50">
+                <div className="flex items-center justify-between px-5 pt-2.5 pb-1.5">
+                  <span className="text-[11px] text-white font-medium">9:41</span>
+                  <div className="w-16 h-4 rounded-full bg-black" />
+                  <span className="text-[10px] text-white">5G</span>
                 </div>
-                <div className="h-px bg-gray-100 my-3" />
-                <div className="flex justify-between text-[11px] mb-3"><span className="text-gray-500">Insurance</span><span className="text-gray-900">{PATIENT.insurance}</span></div>
-                <div className="h-px bg-gray-100 my-3" />
-                <div className="space-y-1.5 text-[11px]">
-                  <div className="flex justify-between"><span className="text-gray-500">Billed</span><span>{fmt$(PATIENT.totalBilled)}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Insurance adjustments</span><span className="text-emerald-600">-{fmt$(Math.abs(PATIENT.totalAdjustment))}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Insurance paid</span><span className="text-emerald-600">-{fmt$(PATIENT.totalInsurancePaid)}</span></div>
-                  <div className="flex justify-between"><span className="text-gray-500">Already paid by you</span><span className="text-emerald-600">-{fmt$(PATIENT.alreadyPaid)}</span></div>
-                  <div className="flex justify-between font-bold pt-1 border-t border-gray-100"><span>Total amount outstanding</span><span>{fmt$(PATIENT.totalOutstanding)}</span></div>
-                </div>
-                <div className="h-px bg-gray-100 my-4" />
-                <h3 className="text-[13px] font-bold text-gray-900 mb-1">Procedures</h3>
-                <p className="text-[10px] text-gray-400 mb-3">Click the procedure to view the details</p>
-                {PATIENT.bills.map((b, i) => (
-                  <div key={i} className="mb-3 border border-gray-100 rounded-lg p-3">
-                    <p className="text-[11px] font-semibold text-gray-900">{b.service}</p>
-                    <p className="text-[10px] text-gray-400">CPT: {b.cpt}</p>
-                    <div className="mt-2 space-y-1 text-[10px]">
-                      <div className="flex justify-between"><span className="text-gray-500">Total billed</span><span>{fmt$(b.billed)}</span></div>
-                      <div className="flex justify-between"><span className="text-gray-500">Insurance paid</span><span className="text-emerald-600">-{fmt$(b.insurancePaid)}</span></div>
-                      {b.copay > 0 && <div className="flex justify-between"><span className="text-gray-500">Already paid (copay)</span><span className="text-emerald-600">-{fmt$(b.copay)}</span></div>}
-                      <div className="flex justify-between font-semibold pt-1 border-t border-gray-50"><span>Amount you owe</span><span>{fmt$(b.youOwe)}</span></div>
-                    </div>
+                <div className="bg-indigo-700 px-4 py-3"><p className="text-[13px] font-semibold text-white">Hi Emily, this is your bill</p></div>
+                <div className="bg-white px-4 py-3 h-[420px] overflow-y-auto">
+                  <h3 className="text-[12px] font-bold text-gray-900 mb-2">Recent visit</h3>
+                  <div className="space-y-1 text-[10px] mb-3">
+                    <div className="flex justify-between"><span className="text-gray-500">Date</span><span className="text-gray-900">{PATIENT.bills[0].date}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Provider</span><span className="text-gray-900">{PATIENT.bills[0].provider}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Location</span><span className="text-gray-900">{PATIENT.bills[0].location}</span></div>
                   </div>
-                ))}
+                  <div className="h-px bg-gray-100 my-2" />
+                  <div className="flex justify-between text-[10px] mb-2"><span className="text-gray-500">Insurance</span><span className="text-gray-900">{PATIENT.insurance}</span></div>
+                  <div className="h-px bg-gray-100 my-2" />
+                  <div className="space-y-1 text-[10px]">
+                    <div className="flex justify-between"><span className="text-gray-500">Billed</span><span>{fmt$(PATIENT.totalBilled)}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Insurance paid</span><span className="text-emerald-600">-{fmt$(PATIENT.totalInsurancePaid)}</span></div>
+                    <div className="flex justify-between"><span className="text-gray-500">Already paid by you</span><span className="text-emerald-600">-{fmt$(PATIENT.alreadyPaid)}</span></div>
+                    <div className="flex justify-between font-bold pt-1 border-t border-gray-100"><span>Total outstanding</span><span>{fmt$(PATIENT.totalOutstanding)}</span></div>
+                  </div>
+                  <div className="h-px bg-gray-100 my-3" />
+                  <h3 className="text-[12px] font-bold text-gray-900 mb-2">Procedures</h3>
+                  {PATIENT.bills.map((b, i) => (
+                    <div key={i} className="mb-2 border border-gray-100 rounded-lg p-2.5">
+                      <p className="text-[10px] font-semibold text-gray-900">{b.service}</p>
+                      <p className="text-[9px] text-gray-400">CPT: {b.cpt}</p>
+                      <div className="mt-1.5 space-y-0.5 text-[9px]">
+                        <div className="flex justify-between"><span className="text-gray-500">Billed</span><span>{fmt$(b.billed)}</span></div>
+                        <div className="flex justify-between"><span className="text-gray-500">Insurance paid</span><span className="text-emerald-600">-{fmt$(b.insurancePaid)}</span></div>
+                        {b.copay > 0 && <div className="flex justify-between"><span className="text-gray-500">Copay paid</span><span className="text-emerald-600">-{fmt$(b.copay)}</span></div>}
+                        <div className="flex justify-between font-semibold pt-0.5 border-t border-gray-50"><span>You owe</span><span>{fmt$(b.youOwe)}</span></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -343,16 +435,16 @@ export default function VoiceDemoPage() {
 
       {/* CTA */}
       <div className="border-t border-white/[0.06] bg-white/[0.02]">
-        <div className="max-w-4xl mx-auto px-4 py-20 text-center">
-          <h2 className="text-[32px] font-bold text-white mb-3">Ready to elevate your patient billing?</h2>
-          <p className="text-slate-400 mb-8 max-w-xl mx-auto">Get a tailored demo. See how practices cut overhead, speed up collections, and boost patient satisfaction with 24/7 AI support.</p>
+        <div className="max-w-4xl mx-auto px-4 py-16 text-center">
+          <h2 className="text-[28px] font-bold text-white mb-3">Ready to elevate your patient billing?</h2>
+          <p className="text-slate-400 mb-8 max-w-xl mx-auto">See how practices cut overhead, speed up collections, and boost patient satisfaction with 24/7 AI voice support.</p>
           <Link href="/demo" className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 shadow-lg shadow-indigo-500/20">Book a demo <ArrowRight className="w-5 h-5" /></Link>
         </div>
       </div>
 
-      <div className="border-t border-white/[0.06] py-6">
+      <div className="border-t border-white/[0.06] py-5">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between text-[11px] text-slate-600">
-          <p>&copy; 2026 Riveo Health, Inc. All Rights Reserved.</p>
+          <p>&copy; 2026 Riveo Health, Inc.</p>
           <div className="flex gap-4"><Link href="/terms" className="hover:text-slate-400">Terms</Link><Link href="/privacy" className="hover:text-slate-400">Privacy</Link><Link href="/security" className="hover:text-slate-400">Security</Link></div>
         </div>
       </div>
