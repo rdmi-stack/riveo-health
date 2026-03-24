@@ -555,9 +555,9 @@ app.post("/api/transcribe", upload.single("audio"), async (req, res) => {
   }
 });
 
-// ── Catch-all for unimplemented routes ─────────────────
-app.use("/api", (req, res) => {
-  res.status(404).json({ error: "Endpoint not found" });
+// ── Root ───────────────────────────────────────────────
+app.get("/", (req, res) => {
+  res.json({ name: "Riveo Health API", status: "running", version: "1.0.0" });
 });
 
 // ── Start ──────────────────────────────────────────────
